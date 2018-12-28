@@ -1,7 +1,28 @@
 <?php
 
 $params = require __DIR__ . '/params.php';
-$db = require __DIR__ . '/db.php';
+//$db = require __DIR__ . '/db.php';
+$modules = require  __DIR__ . '/modules.php';
+
+$db_env = '';
+switch (YII_ENV) {
+    case 'dev':
+        $db_env = 'dev';
+        break;
+    case 'test':
+        $db_env = 'dev';
+        break;
+    case 'online':
+        $db_env = 'online';
+        break;
+    case 'prod':
+        $db_env = 'prod';
+        break;
+    default:
+        $db_env = 'dev';
+        break;
+}
+$db = require __DIR__ . '/databases/' .$db_env. '.php';
 
 $config = [
     'id' => 'basic',
@@ -43,16 +64,15 @@ $config = [
             ],
         ],
         'db' => $db,
-        /*
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
             ],
         ],
-        */
     ],
     'params' => $params,
+    'modules' => $modules,
 ];
 
 if (YII_ENV_DEV) {
