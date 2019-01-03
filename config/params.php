@@ -12,9 +12,10 @@ return [
     ],
     'pay_channel_services_mode_map' => [
         1001 => [
-            'web_pay' => '',
+            'web_pay' => 'getJsApiData',
             'wap_pay' => '',
             'app_pay' => '',
         ],
     ],
+
 ];

@@ -44,7 +44,8 @@ class PayController extends CommonController
     public function actionWechatpay()
     {
         $channel_id = Yii::$app->request->post('channel_id', 0);
-        $ret = (new WechatPayService())->getJsApiData();
+        $code = Yii::$app->request->post('code', '');
+        $ret = (new WechatPayService())->getJsApiData($code);
         var_dump($ret);die();
     }
 
