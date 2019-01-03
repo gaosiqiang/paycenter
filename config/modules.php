@@ -11,6 +11,6 @@ return [
         'class' => 'app\modules\order\Module',
     ],
     'payment' => [
-        'class' => 'app\modules\payment\Module',
-    ]
+            'class' => 'app\modules\payment\Module'
+    ],
 ];

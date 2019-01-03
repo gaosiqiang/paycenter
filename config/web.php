@@ -1,8 +1,9 @@
 <?php
 
+require __DIR__ . '/const.php';
 $params = require __DIR__ . '/params.php';
 //$db = require __DIR__ . '/db.php';
-$modules = require  __DIR__ . '/modules.php';
+$modules = require __DIR__ . '/modules.php';
 
 $db_env = '';
 switch (YII_ENV) {
@@ -36,6 +37,8 @@ $config = [
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => 'Ea4bSr5VOfeHbE3DEC9PqEiRSZDWZNfD',
+            'csrfParam' => '_csrf-backend',//未知
+            'enableCsrfValidation' => false,//不验证csrf
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
