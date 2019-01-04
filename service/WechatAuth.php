@@ -43,6 +43,7 @@ class WechatAuth
         if (!isset($code) || !$code){
             //触发微信返回code码
             $baseUrl = urlencode('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].$_SERVER['QUERY_STRING']);
+            $baseUrl = urlencode('http://baidu.com');
             $url = $this->_CreateOauthUrlForCode($baseUrl, $app_id);
             Header("Location: $url");
             exit();

@@ -12,31 +12,25 @@ use app\component\WechatSign;
 use app\service\CommonService;
 use app\component\WechatJsApiPayTool;
 use app\component\WeChatHttpCurl;
-use app\component\Tools;
+use app\component\WechatPayTools;
 use app\service\WechatAuth;
 
 class WechatPayService
 {
-
-    public $service = null;
-
-    public function setPayMode($channel, $mode_code)
-    {
-
-    }
-
-    public function setParams($params)
-    {
-
-    }
-
-    public function getJsApiData($code)
+    /**
+     * 获取支付接口相应数据
+     * @throws \Exception
+     */
+    public function getPayApiData($request_data)
     {
         $url = "https://api.mch.weixin.qq.com/pay/unifiedorder";
-        $config = ['mch_id' => '1900009851'];
-        $data = [
-            'openid' => (new WechatAuth())->GetOpenid($code, 'wx426b3015555a46be', '1900009851'),
-            'appid' => 'wx426b3015555a46be',
+        $appid = 'wx426b3015555a46be';
+        $mch_id = '1900009851';
+        $openid = '';
+        $time_out = 30;
+        $requst_data = [
+            'openid' => $openid,
+            'appid' => $appid,
             'body' => 'test',//商品描述
             'attach' => 'test',//附加数据
             'out_trade_no' => "sdkphp".date("YmdHis"),//商户内部订单号
@@ -46,20 +40,72 @@ class WechatPayService
             'goods_tag' => 'xx',//商品标签
             'notify_url' => 'http://www.baidu.com',//微信支付回调地址
             'trade_type' => 'JSAPI',//微信支付方式，设置取值如下：JSAPI，NATIVE，APP，详细说明见参数规定
-            'mch_id' => '1900009851',//商户id
+            'mch_id' => $mch_id,//商户id
             'spbill_create_ip' => $_SERVER['REMOTE_ADDR'],//支付ip
             'nonce_str' => WechatSign::getNonceStr(),//设置随机字符
+            'product_id' => '1',//商品id，NATIVE场景使用
         ];
-        $data['sign'] = WechatSign::getSign($data);//签名
-        $data['sign_type'] = WechatSign::GetSignType();//签名类型
-
-        $time_out = 30;
-        $ret = WeChatHttpCurl::postXmlCurl($config, $data, $url, false, $time_out);
-        print_r($ret);die();
-        if (!$ret) {
-            return ['code' => 100010, 'msg' => 'error params', 'data' => (object)[]];
+        $sign = WechatSign::getSign($requst_data);//签名
+        $sign_type = WechatSign::GetSignType();//签名类型
+        $response = WeChatHttpCurl::postXmlCurl(['mch_id' => $mch_id], array_merge($requst_data, ['sign' => $sign, 'sign_type' => $sign_type]), $url, false, $time_out);
+        $result = WxPayResultsService::Init(array_merge($requst_data, ['sign' => $sign, 'sign_type' => $sign_type]), $response, $sign);
+        if ($requst_data['trade_type'] === 'NATIVE') {
+            $result['code_url'] = 'http://qrcode.zyuwen.cn/img/qrcode?code=' . urlencode($result['code_url']);
         }
-        return ['code' => 0, 'msg' => 'access', 'data' => ['js_api_parameters' => $jsApiParameters, 'edit_address' => $editAddress]];
+        return $result;
+    }
+
+    /**
+     * 处理扫码支付
+     * @param $requst_data
+     * @param $result
+     * @return mixed
+     */
+    public function handleNative($requst_data, $result)
+    {
+        if ($requst_data['trade_type'] === 'NATIVE') {
+            $result['code_url'] = 'http://qrcode.zyuwen.cn/img/qrcode?code=' . urlencode($result['code_url']);
+        }
+        return $result;
+    }
+
+    /**
+     * 处理jsapi支付
+     * @param $requst_data
+     * @param $result
+     * @return array
+     */
+    public function handleJsapi($requst_data, $result)
+    {
+        $access_token = '';
+        if ($requst_data['trade_type'] === 'JSAPI') {
+            $jsApiParameters = WechatPayTools::GetJsApiParameters($result, $requst_data);
+            //获取共享收货地址js函数参数
+            $editAddress = WechatPayTools::GetEditAddressParameters(['appid' => $requst_data['appid'], 'access_token' => $access_token]);
+        }
+        return ['jsApiParameters' => $jsApiParameters, 'editAddress' => $editAddress];
+    }
+
+    /**
+     * 处理app支付参数
+     * @param $requst_data
+     * @param $result
+     * @return array
+     */
+    public function handleApp($requst_data, $result)
+    {
+        if ($requst_data['trade_type'] === 'APP') {
+            return $result;
+        }
+        return [];
+    }
+
+    /**
+     * 处理支付数据
+     */
+    public function handle($call_back, $params)
+    {
+       return [];
     }
 
 }

@@ -1,7 +1,7 @@
 <?php
 namespace app\component;
 
-use app\component\Tools;
+use app\component\WechatPayTools;
 
 /**
  * Created by PhpStorm.
@@ -59,7 +59,7 @@ class WeChatHttpCurl {
             curl_setopt($ch,CURLOPT_SSLKEY, $sslKeyPath);
         }
         //post提交方式
-        $xml = Tools::arrayToXml($data);
+        $xml = WechatPayTools::arrayToXml($data);
         curl_setopt($ch, CURLOPT_POST, TRUE);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
         //运行curl

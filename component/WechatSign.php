@@ -91,4 +91,31 @@ class WechatSign
         return $str;
     }
 
+    /**
+     * @param WxPayConfigInterface $config  配置对象
+     * 检测签名
+     */
+    public static function CheckSign($data, $check_sign)
+    {
+        if(!self::IsSignSet($data)){
+            throw new \Exception("签名错误！");
+        }
+
+        $sign = self::MakeSign($data, false);
+        if($check_sign == $sign){
+            //签名正确
+            return true;
+        }
+        throw new \Exception("签名错误！");
+    }
+
+    /**
+     * 判断签名，详见签名生成算法是否存在
+     * @return true 或 false
+     **/
+    public static function IsSignSet($data)
+    {
+        return array_key_exists('sign', $data);
+    }
+
 }

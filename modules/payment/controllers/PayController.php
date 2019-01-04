@@ -15,25 +15,6 @@ use app\service\WechatPayService;
 
 class PayController extends CommonController
 {
-
-
-    /**
-     * Renders the index view for the module
-     * @return string
-     */
-    public function actionIndex()
-    {
-        echo 111;die();
-    }
-
-    /**
-     * 发起支付
-     */
-    public function actionCreate()
-    {
-
-    }
-
     /**
      * 退款
      */
@@ -41,11 +22,16 @@ class PayController extends CommonController
     {
     }
 
-    public function actionWechatpay()
+    /**
+     * 获取支付参数
+     * @throws \Exception
+     */
+    public function actionGet()
     {
         $channel_id = Yii::$app->request->post('channel_id', 0);
-        $code = Yii::$app->request->post('code', '');
-        $ret = (new WechatPayService())->getJsApiData($code);
+        $scene_id = Yii::$app->request->post('scene_id', 0);
+        $brand_info = Yii::$app->request->post('brand_info', '');
+        $ret = (new WechatPayService())->main($channel_id, $scene_id, $brand_info);
         var_dump($ret);die();
     }
 
