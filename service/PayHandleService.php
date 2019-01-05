@@ -20,30 +20,17 @@ class PayHandleService extends CommonService
     public $scene = '';
 
     /**
-     * 设置
-     * @param $channel
-     */
-    public function setPayChannel($channel_id)
-    {
-        if (!$channel_id || !in_array($channel_id, $this->config_params['pay_channel_id_set'])) {
-            //抛出异常
-            throw new ServiceException('params error', 100010);
-        }
-        $this->channel_id = $channel_id;
-        return;
-    }
-    /**
      * 设置场景服务
      * @param $channel
      * @param $mode_code
      */
     public function setPayService($service_id)
     {
-        if (!$service_id || !in_array($service_id, $this->config_params['pay_service_id_set']) || !isset($this->config_params['pay_channel_services_map'][$this->channel_id][$service_id])) {
+        if (!$service_id || !in_array($service_id, $this->config_params['pay_service_id_set'])) {
             throw new ServiceException('params error', 100010);
         }
         $this->service_id = $service_id;
-        $service = $this->config_params['pay_channel_services_dict'][$service_id];
+        $service = $this->config_params['pay_services_dict'][$service_id];
         $this->service = (new $service());
         return;
     }
@@ -59,7 +46,7 @@ class PayHandleService extends CommonService
         if (!$scene_id || !in_array($scene_id, $this->config_params['pay_scene_id_set'])) {
             throw new ServiceException('params error', 100010);
         }
-        $this->scene = $this->config_params['pay_channel_scene_dict'][$scene_id];
+        $this->scene = $this->config_params['pay_scene_dict'][$scene_id];
         return;
     }
 
@@ -71,20 +58,22 @@ class PayHandleService extends CommonService
      * @param $brand_info
      * @return array
      */
-    public function main($channel_id, $service_id, $scene_id, $brand_info)
+    public function main($channel_id, $scene_id, $pay_info)
     {
-        if (!$channel_id || !$scene_id || !$brand_info) {
+        if (!$channel_id || !$scene_id) {
             return ['code' => 100010, 'msg' => 'params error'];
         }
         try {
-            $this->setPayChannel($channel_id);
-            $this->setPayService($service_id);
+            $this->setPayService($channel_id);
             $this->setPayScene($scene_id);
         } catch (ServiceException $e) {
             return ['code' => $e->getCode(), 'msg' => $e->getMessage()];
         }
-        //TODO 业务
-        $this->service->handle($this->scene, $brand_info);
+        $ret = $this->service->handle($this->scene, $pay_info);
+        if (!$ret) {
+            return ['code' => 100010, 'msg' => '支付失败'];
+        }
+        return ['code' => 0, 'msg' => 'error', 'data' => ['action_pay_data' => $ret]];
     }
 
 }

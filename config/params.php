@@ -24,31 +24,33 @@ return [
         200103,
     ],
     /**
-     * 支付频道服务场景id地图
+     * 支付服务场景id地图
      */
-    'pay_channel_service_scene_id_map' => [
-        200000 => [
-            200100 => [
-                200101,
-                200102,
-                200103,
-            ],
+    'pay_service_scene_id_map' => [
+        200100 => [
+            200101,
+            200102,
+            200103,
         ],
     ],
     /**
      * 支付频道服务字典
      */
-    'pay_channel_services_dict' => [
-        100100 => 'AliPayService',
-        200100 => 'WechatPayService',
+    'pay_services_dict' => [
+        100100 => '\app\service\AliPayService',
+        200100 => '\app\service\WechatPayService',
     ],
     /**
      * 支付频道-服务-场景字典
      */
-    'pay_channel_scene_dict' => [
-        200101 => 'web_pay',
-        200102 => 'wap_pay',
-        200103 => 'app_pay',
+    'pay_scene_dict' => [
+        200101 => 'handleNative', //扫码支付
+        200102 => 'handleJsapi', //wap支付
+        200103 => 'handleApp', //app支付
     ],
+
+
+    //service list
+    'qrcode_service_url' => 'http://qrcode.zyuwen.cn/img/qrcode?code=',
 
 ];

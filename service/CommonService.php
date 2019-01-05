@@ -6,8 +6,12 @@ namespace app\service;
  * Date: 2018/12/28
  * Time: 2:49 PM
  */
+
+use Yii;
+
 class CommonService {
-    public static $config_params = [];
+
+    public $config_params = [];
 
     public function __construct($call_back = null, $param = [])
     {
