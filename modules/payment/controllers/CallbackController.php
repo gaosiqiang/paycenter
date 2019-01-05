@@ -19,10 +19,13 @@ class CallbackController extends CommonController
      */
     public function actionIndex()
     {
-        $channel_id = Yii::$app->get('channel_id', 0);//回调频道id
-        $ret = (new PayCallBackService())->callBack($channel_id);
-        print_r($ret);
-        die();
+        $service_id = Yii::$app->get('service_id', 0);//回调频道id
+        $request_data = Yii::$app->get('request_data', '');
+        $ret = (new PayCallBackService())->mian($service_id, $request_data);
+        $this->code = $ret['code'];
+        $this->msg = $ret['msg'];
+        $this->data = $ret['data'];
+        $this->echoJson();
     }
 
 }

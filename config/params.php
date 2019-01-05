@@ -48,7 +48,9 @@ return [
         200102 => 'handleJsapi', //wap支付
         200103 => 'handleApp', //app支付
     ],
-
+    'pay_call_back_serbice_dict' => [
+        200100 => '\app\service\WechatCallBackService',
+    ],
 
     //service list
     'qrcode_service_url' => 'http://qrcode.zyuwen.cn/img/qrcode?code=',
