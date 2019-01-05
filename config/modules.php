@@ -7,9 +7,6 @@
  * Time: 1:55 PM
  */
 return [
-    'order' => [
-        'class' => 'app\modules\order\Module',
-    ],
     'payment' => [
             'class' => 'app\modules\payment\Module'
     ],

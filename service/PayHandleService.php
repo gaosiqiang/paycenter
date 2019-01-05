@@ -66,6 +66,7 @@ class PayHandleService extends CommonService
         try {
             $this->setPayService($channel_id);
             $this->setPayScene($scene_id);
+            $pay_info = json_decode($pay_info, 1);
         } catch (ServiceException $e) {
             return ['code' => $e->getCode(), 'msg' => $e->getMessage()];
         }

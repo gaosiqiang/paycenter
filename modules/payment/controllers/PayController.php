@@ -18,8 +18,10 @@ class PayController extends CommonController
     /**
      * 退款
      */
-    public function actionReturn()
+    public function actionRefund()
     {
+        $channel_id = Yii::$app->request->post('channel_id', 0);
+        $refund_info = Yii::$app->request->post('refund_info', '');
 
     }
 
