@@ -55,7 +55,7 @@ IND: 保险
 name: 姓名
 cert_type: 身份证：IDENTITY_CARD、护照：PASSPORT、军官证：OFFICER_CARD、士兵证：SOLDIER_CARD、户口本：HOKOU等
 cert_no: 证件号码
-need_check_info取值 T/F，只有为T时才做强制校验。
+need_check_info取值 Tools/F，只有为T时才做强制校验。
 mobile:手机号，目前暂不使用此字段做校验
 min_age: 允许的最小买家年龄,min_age为整数，必须大于等于0.
 	 **/

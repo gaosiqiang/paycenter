@@ -7,6 +7,7 @@
  */
 namespace app\modules\payment\controllers;
 
+use app\service\PayCallBackService;
 use Yii;
 use app\component\CommonController;
 
@@ -18,7 +19,10 @@ class CallbackController extends CommonController
      */
     public function actionIndex()
     {
-
+        $channel_id = Yii::$app->get('channel_id', 0);//回调频道id
+        $ret = (new PayCallBackService())->callBack($channel_id);
+        print_r($ret);
+        die();
     }
 
 }
