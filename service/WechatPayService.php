@@ -49,6 +49,7 @@ class WechatPayService
         */
         $sign = WechatSign::getSign($request_data);//签名
         $sign_type = WechatSign::GetSignType();//签名类型
+        $request_data['notify_url'] = $request_data['notify_url'].'?request_data='.json_encode($request_data);
         $response = WeChatHttpCurl::postXmlCurl(['mch_id' => $mch_id], array_merge($request_data, ['sign' => $sign, 'sign_type' => $sign_type]), $url, false, $time_out);
         $result = WxPayResultsService::Init(array_merge($request_data, ['sign' => $sign, 'sign_type' => $sign_type]), $response, $sign);
         return $result;

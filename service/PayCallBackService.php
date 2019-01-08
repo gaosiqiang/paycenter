@@ -44,6 +44,7 @@ class PayCallBackService extends CommonService
             //设置服务
             $this->setService($service_id);
             //回调设置服务
+            $requst_data = json_decode($requst_data, 1);
             $ret = $this->service->main($requst_data);
             if (!$ret) {
                 throw new ServiceException('支付回调失败', 100010);
