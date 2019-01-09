@@ -10,7 +10,7 @@ namespace app\service;
 
 use app\component\WeChatHttpCurl;
 use app\component\WechatPayTools;
-use app\component\WechatSign;
+use app\component\WechatSignTools;
 use app\service\CommonService;
 
 class WechatCallBackService extends CommonService
@@ -60,7 +60,7 @@ class WechatCallBackService extends CommonService
     public function checkCallBackData($data, $sign_config)
     {
         //验证签名是否一致
-        if ($data['sign'] != WechatSign::MakeSign($sign_config, false)) {
+        if ($data['sign'] != WechatSignTools::MakeSign($sign_config, false)) {
             return 0;
         }
         $request_data = [];
@@ -79,7 +79,7 @@ class WechatCallBackService extends CommonService
         $response = WeChatHttpCurl::postXmlCurl($config, array_merge($request_data, ['transaction_id' => $transaction_id]), $url, false, 30);
         $response = WechatPayTools::xmlToArray($response);
         //验证签名
-        $result = WxPayResultsService::Init($request_data, $response, $response['sign'], WechatSign::getSign($request_data));
+        $result = WxPayResultsService::InitResults($request_data, $response, $response['sign'], WechatSignTools::getSign($request_data));
         if (!$result) {
             return 0;
         }

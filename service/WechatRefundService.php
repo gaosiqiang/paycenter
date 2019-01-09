@@ -11,7 +11,7 @@ namespace app\service;
 
 use app\component\ServiceException;
 use app\component\WeChatHttpCurl;
-use app\component\WechatSign;
+use app\component\WechatSignTools;
 
 class WechatRefundService
 {
@@ -74,11 +74,11 @@ class WechatRefundService
         $url = "https://api.mch.weixin.qq.com/secapi/pay/refund";
         //检测必填参数
         $request_data = $params;
-        $request_data['nonce_str'] = WechatSign::getNonceStr();//设置随机字符//随机字符串
-        $sign = WechatSign::getSign($request_data);//签名
+        $request_data['nonce_str'] = WechatSignTools::getNonceStr();//设置随机字符//随机字符串
+        $sign = WechatSignTools::getSign($request_data);//签名
         $time_out = 30;
         $response = WeChatHttpCurl::postXmlCurl(['mch_id' => $params['mch_id']], array_merge($request_data, ['sign' => $sign]), $url, false, $time_out);
-        $result = WxPayResultsService::Init(array_merge($request_data, ['sign' => $sign]), $response, $sign);
+        $result = WxPayResultsService::InitResults(array_merge($request_data, ['sign' => $sign]), $response, $sign);
         return $result;
     }
 

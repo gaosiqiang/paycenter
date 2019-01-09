@@ -8,7 +8,7 @@
 
 namespace app\service;
 
-use app\component\WechatSign;
+use app\component\WechatSignTools;
 use app\service\CommonService;
 use app\component\WechatJsApiPayTool;
 use app\component\WeChatHttpCurl;
@@ -24,14 +24,11 @@ class WechatPayService
     public function getPayApiData($request_data)
     {
         $url = "https://api.mch.weixin.qq.com/pay/unifiedorder";
-//        $appid = 'wx426b3015555a46be';
-        $mch_id = $request_data['mch_id'];
-//        $openid = '';
         $time_out = 30;
         /*
         $request_data = [
             'openid' => $openid,
-            'appid' => $appid,
+            'appid' => 'wx426b3015555a46be',
             'body' => 'test',//商品描述
             'attach' => 'test',//附加数据
             'out_trade_no' => "sdkphp".date("YmdHis"),//商户内部订单号
@@ -47,11 +44,11 @@ class WechatPayService
             'product_id' => '1',//商品id，NATIVE场景使用
         ];
         */
-        $sign = WechatSign::getSign($request_data);//签名
-        $sign_type = WechatSign::GetSignType();//签名类型
+        $sign = WechatPayTools::getSign($request_data);//签名
+        $sign_type = WechatPayTools::GetSignType();//签名类型
         $request_data['notify_url'] = $request_data['notify_url'].'?request_data='.json_encode($request_data);
-        $response = WeChatHttpCurl::postXmlCurl(['mch_id' => $mch_id], array_merge($request_data, ['sign' => $sign, 'sign_type' => $sign_type]), $url, false, $time_out);
-        $result = WxPayResultsService::Init(array_merge($request_data, ['sign' => $sign, 'sign_type' => $sign_type]), $response, $sign);
+        $response = WechatPayTools::postXmlCurl(['mch_id' => $request_data['mch_id']], array_merge($request_data, ['sign' => $sign, 'sign_type' => $sign_type]), $url, false, $time_out);
+        $result = WechatPayTools::InitResults(array_merge($request_data, ['sign' => $sign, 'sign_type' => $sign_type]), $response, $sign);
         return $result;
     }
 
@@ -158,7 +155,7 @@ class WechatPayService
 //            'trade_type' => 'NATIVE',//微信支付方式，设置取值如下：JSAPI，NATIVE，APP，详细说明见参数规定
 //            'mch_id' => '1900009851',//商户id
                 'spbill_create_ip' => $_SERVER['REMOTE_ADDR'],//支付ip
-                'nonce_str' => WechatSign::getNonceStr(),//设置随机字符
+                'nonce_str' => WechatSignTools::getNonceStr(),//设置随机字符
 //            'product_id' => '1',//商品id，NATIVE场景使用
         ];
     }

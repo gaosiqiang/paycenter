@@ -11,65 +11,9 @@ namespace app\component;
 class WechatPayTools
 {
     /**
-     * 获取毫秒级别的时间戳
-     */
-    private static function getMillisecond()
-    {
-        //获取毫秒的时间戳
-        $time = explode ( " ", microtime () );
-        $time = $time[1] . ($time[0] * 1000);
-        $time2 = explode( ".", $time );
-        $time = $time2[0];
-        return $time;
-    }
-
-    /**
-     * 输出xml字符
-     * @throws WxPayException
-     **/
-    public static function arrayToXml($array)
-    {
-        if(!is_array($array) || count($array) <= 0)
-        {
-            throw new \Exception("数组数据异常！");
-        }
-
-        $xml = "<xml>";
-        foreach ($array as $key=>$val)
-        {
-//            if (is_numeric($val)){
-//                $xml.="<".$key.">".$val."</".$key.">";
-//            }else{
-//                $xml.="<".$key."><![CDATA[".$val."]]></".$key.">";
-//            }
-            $xml.="<".$key.">".$val."</".$key.">";
-        }
-        $xml.="</xml>";
-        return $xml;
-    }
-
-    /**
-     * 将xml转为array
-     * @param string $xml
-     * @throws WxPayException
-     */
-    public static function xmlToArray($xml)
-    {
-        if(!$xml){
-            throw new Exception("xml数据异常！");
-        }
-        //将XML转为array
-        //禁止引用外部xml实体
-        libxml_disable_entity_loader(true);
-        return json_decode(json_encode(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)), true);
-    }
-
-    /**
-     *
      * 获取jsapi支付的参数
      * @param array $UnifiedOrderResult 统一支付接口返回的数据
      * @throws WxPayException
-     *
      * @return json数据，可直接填入js函数作为参数
      */
     public static function GetJsApiParameters($UnifiedOrderResult, $config)
@@ -84,17 +28,15 @@ class WechatPayTools
         $data['appId'] = $UnifiedOrderResult["appid"];
         $timeStamp = time();
         $data['timeStamp'] = "$timeStamp";
-        $data['nonceStr'] = WechatSign::getNonceStr();
+        $data['nonceStr'] = WechatSignTools::getNonceStr();
         $data['package'] = "prepay_id=" . $UnifiedOrderResult['prepay_id'];
-        $data['paySign'] = WechatSign::MakeSign($config);;
+        $data['paySign'] = WechatSignTools::MakeSign($config);;
         $parameters = json_encode($data);
         return $parameters;
     }
 
     /**
-     *
      * 获取地址js参数
-     *
      * @return 获取共享收货地址js函数需要的参数，json格式可以直接做参数使用
      */
     public static function GetEditAddressParameters($config)
@@ -104,7 +46,7 @@ class WechatPayTools
         $data["url"] = "http://".$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
         $time = time();
         $data["timestamp"] = "$time";
-        $data["noncestr"] = WechatSign::getNonceStr();
+        $data["noncestr"] = WechatSignTools::getNonceStr();
         $data["accesstoken"] = $config["access_token"];
 
         ksort($data);
@@ -123,18 +65,126 @@ class WechatPayTools
     }
 
     /**
+     * 以post方式提交xml到对应的接口url
      *
-     * 拼接签名字符串
-     * @param array $urlObj
-     *
-     * @return 返回已经拼接好的字符串
+     * @param WxPayConfigInterface $config  配置对象
+     * @param string $xml  需要post的xml数据
+     * @param string $url  url
+     * @param bool $useCert 是否需要证书，默认不需要
+     * @param int $second   url执行超时时间，默认30s
+     * @throws WxPayException
      */
-    private static function ToUrlParams($urlObj)
+    public static function postXmlCurl($config, $data, $url, $useCert = false, $second = 30)
+    {
+        $ch = curl_init();
+        $curlVersion = curl_version();
+        $ua = "WXPaySDK/3.0.9 (".PHP_OS.") PHP/".PHP_VERSION." CURL/".$curlVersion['version']." "
+            .$config['mch_id'];
+
+        //设置超时
+        curl_setopt($ch, CURLOPT_TIMEOUT, $second);
+        //代理相关配置
+        $proxyHost = "0.0.0.0";
+        $proxyPort = 0;
+        //如果有配置代理这里就设置代理
+        if($proxyHost != "0.0.0.0" && $proxyPort != 0){
+            curl_setopt($ch,CURLOPT_PROXY, $proxyHost);
+            curl_setopt($ch,CURLOPT_PROXYPORT, $proxyPort);
+        }
+        curl_setopt($ch,CURLOPT_URL, $url);
+        curl_setopt($ch,CURLOPT_SSL_VERIFYPEER,TRUE);
+        curl_setopt($ch,CURLOPT_SSL_VERIFYHOST,2);//严格校验
+        curl_setopt($ch,CURLOPT_USERAGENT, $ua);
+        //设置header
+        curl_setopt($ch, CURLOPT_HEADER, FALSE);
+        //要求结果为字符串且输出到屏幕上
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+        //如果使用证书
+        if($useCert == true){
+            //设置证书
+            //使用证书：cert 与 key 分别属于两个.pem文件
+            //证书文件请放入服务器的非web目录下，也就是不要放在虚拟目录下
+            $sslCertPath = "";
+            $sslKeyPath = "";
+            curl_setopt($ch,CURLOPT_SSLCERTTYPE,'PEM');
+            curl_setopt($ch,CURLOPT_SSLCERT, $sslCertPath);
+            curl_setopt($ch,CURLOPT_SSLKEYTYPE,'PEM');
+            curl_setopt($ch,CURLOPT_SSLKEY, $sslKeyPath);
+        }
+        //post提交方式
+        $xml = WechatPayTools::arrayToXml($data);
+        curl_setopt($ch, CURLOPT_POST, TRUE);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
+        //运行curl
+        $data = curl_exec($ch);
+        //var_dump(curl_getinfo($ch));die();
+        //返回结果
+        if($data){
+            curl_close($ch);
+            return $data;
+        } else {
+            $error = curl_errno($ch);
+            curl_close($ch);
+            throw new \Exception("curl出错，错误码:$error");
+        }
+    }
+
+    /**
+     * 获取签名
+     * @param $data
+     * @return 签名，本函数不覆盖sign成员变量，如要设置签名需要调用SetSign方法赋值
+     * @throws \Exception
+     */
+    public static function getSign($data)
+    {
+        $sign = self::MakeSign($data);
+        return $sign;
+    }
+
+    /**
+     * 生成签名
+     * @param WxPayConfigInterface $config  配置对象
+     * @param bool $needSignType  是否需要补signtype
+     * @return 签名，本函数不覆盖sign成员变量，如要设置签名需要调用SetSign方法赋值
+     */
+    public static function MakeSign($data, $needSignType = true)
+    {
+        if($needSignType) {
+            $data['sign_type'] = self::GetSignType();
+        }
+        //签名步骤一：按字典序排序参数
+        ksort($data);
+        $string = self::ToUrlParams($data);
+        //签名步骤二：在string后加入KEY
+        $string = $string . "&key=".self::GetKey();
+        //签名步骤三：MD5加密或者HMAC-SHA256
+        if(self::GetSignType() == "MD5"){
+            $string = md5($string);
+        } else if(self::GetSignType() == "HMAC-SHA256") {
+            $string = hash_hmac("sha256",$string ,self::GetKey());
+        } else {
+            throw new \Exception("签名类型不支持！");
+        }
+
+        //签名步骤四：所有字符转为大写
+        $result = strtoupper($string);
+        return $result;
+    }
+
+    public static function GetSignType()
+    {
+        return "HMAC-SHA256";
+    }
+
+    /**
+     * 格式化参数格式化成url参数
+     */
+    public static function ToUrlParams($data)
     {
         $buff = "";
-        foreach ($urlObj as $k => $v)
+        foreach ($data as $k => $v)
         {
-            if($k != "sign"){
+            if($k != "sign" && $v != "" && !is_array($v)){
                 $buff .= $k . "=" . $v . "&";
             }
         }
@@ -142,5 +192,81 @@ class WechatPayTools
         $buff = trim($buff, "&");
         return $buff;
     }
+
+    public static function GetKey()
+    {
+        return '8934e7d15453e97507ef794cf7b0519d';
+    }
+
+    /**
+     *
+     * 产生随机字符串，不长于32位
+     * @param int $length
+     * @return 产生的随机字符串
+     */
+    public static function getNonceStr($length = 32)
+    {
+        $chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+        $str ="";
+        for ( $i = 0; $i < $length; $i++ )  {
+            $str .= substr($chars, mt_rand(0, strlen($chars)-1), 1);
+        }
+        return $str;
+    }
+
+    /**
+     * @param WxPayConfigInterface $config  配置对象
+     * 检测签名
+     */
+    public static function CheckSign($data, $check_sign)
+    {
+        if(!self::IsSignSet($data)){
+            throw new \Exception("签名错误！");
+        }
+
+        $sign = self::MakeSign($data, false);
+        if($check_sign == $sign){
+            //签名正确
+            return true;
+        }
+        throw new \Exception("签名错误！");
+    }
+
+    /**
+     * 判断签名，详见签名生成算法是否存在
+     * @return true 或 false
+     **/
+    public static function IsSignSet($data)
+    {
+        return array_key_exists('sign', $data);
+    }
+
+    /**
+     * 格式化微信支付结果数据
+     * @param $data
+     * @param $response
+     * @param $sign
+     * @return array
+     */
+    public static function InitResults($data, $response, $sign)
+    {
+        try {
+            $response = Tools::xmlToArray($response);
+            //失败则直接返回失败
+            if($response['return_code'] != 'SUCCESS') {
+                foreach ($response as $key => $value) {
+                    #除了return_code和return_msg之外其他的参数存在，则报错
+                    if($key != "return_code" && $key != "return_msg"){
+                        throw new \Exception("输入数据存在异常！");
+                    }
+                }
+            }
+            WechatPayTools::CheckSign($data, $sign);
+        } catch (\Exception $e) {
+            return [];
+        }
+        return $response;
+    }
+
 
 }
