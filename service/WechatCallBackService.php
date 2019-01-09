@@ -8,9 +8,8 @@
 
 namespace app\service;
 
-use app\component\WeChatHttpCurl;
+use app\component\Tools;
 use app\component\WechatPayTools;
-use app\component\WechatSignTools;
 use app\service\CommonService;
 
 class WechatCallBackService extends CommonService
@@ -24,14 +23,14 @@ class WechatCallBackService extends CommonService
         //获取回调数据
         $data = $this->getCallBackData();
         if (!$data) {
-            return [];
+            return ['code' => 100010, 'msg' => 'error', 'data' => ['call_back_data' => $data]];
         }
         //分析验证回调数据
         $ret = $this->checkCallBackData($data, $params);
         if (!$ret) {
-            return [];
+            return ['code' => 100010, 'msg' => 'error', 'data' => ['call_back_data' => $data]];
         }
-        return $ret;
+        return ['code' => 0, 'msg' => 'access', 'data' => ['call_back_res' => $ret, 'call_back_data' => $data]];
     }
 
     /**
@@ -44,7 +43,7 @@ class WechatCallBackService extends CommonService
             # 如果没有数据，直接返回失败
             return [];
         }
-        $data = WechatPayTools::xmlToArray($GLOBALS['HTTP_RAW_POST_DATA']);
+        $data = Tools::xmlToArray($GLOBALS['HTTP_RAW_POST_DATA']);
         if (!$data) {
             return [];
         }
@@ -60,7 +59,7 @@ class WechatCallBackService extends CommonService
     public function checkCallBackData($data, $sign_config)
     {
         //验证签名是否一致
-        if ($data['sign'] != WechatSignTools::MakeSign($sign_config, false)) {
+        if ($data['sign'] != WechatPayTools::MakeSign($sign_config, false)) {
             return 0;
         }
         $request_data = [];
@@ -76,10 +75,10 @@ class WechatCallBackService extends CommonService
     {
         $url = "https://api.mch.weixin.qq.com/pay/orderquery";
         $config['mch_id'] = $request_data['mch_id'];
-        $response = WeChatHttpCurl::postXmlCurl($config, array_merge($request_data, ['transaction_id' => $transaction_id]), $url, false, 30);
-        $response = WechatPayTools::xmlToArray($response);
+        $response = WechatPayTools::postXmlCurl($config, array_merge($request_data, ['transaction_id' => $transaction_id]), $url, false, 30);
+        $response = Tools::xmlToArray($response);
         //验证签名
-        $result = WxPayResultsService::InitResults($request_data, $response, $response['sign'], WechatSignTools::getSign($request_data));
+        $result = WechatPayTools::InitResults($request_data, $response, $response['sign'], WechatPayTools::getSign($request_data));
         if (!$result) {
             return 0;
         }

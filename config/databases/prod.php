@@ -2,7 +2,7 @@
 
 return [
     'class' => 'yii\db\Connection',
-    'dsn' => 'mysql:host=db.zwwl.com;dbname=integral',
+    'dsn' => 'mysql:host=db.zwwl.com;dbname=paycenter',
     'username' => 'root',
     'password' => 'zwwlzgxt',
     'charset' => 'utf8',

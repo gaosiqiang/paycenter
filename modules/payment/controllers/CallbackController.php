@@ -19,12 +19,12 @@ class CallbackController extends CommonController
      */
     public function actionPay()
     {
-        $service_id = Yii::$app->get('service_id', 0);//回调频道id
-        $request_data = Yii::$app->get('request_data', '');
-        $ret = (new PayCallBackService())->mian($service_id, $request_data);
+        $service_id = Yii::$app->request->get('service_id', 0);//回调频道id
+        $order_id = Yii::$app->request->get('order_id', 0);//支付订单id
+        $ret = (new PayCallBackService())->mian($service_id, $order_id);
         $this->code = $ret['code'];
         $this->msg = $ret['msg'];
-        $this->data = $ret['data'];
+        //$this->data = $ret['data'];
         $this->echoJson();
     }
 

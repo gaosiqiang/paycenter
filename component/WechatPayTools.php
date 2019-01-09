@@ -5,8 +5,10 @@
  * Date: 2019/1/3
  * Time: 4:22 PM
  */
-
 namespace app\component;
+
+use app\component\Tools;
+use app\component\WechatException;
 
 class WechatPayTools
 {
@@ -22,7 +24,7 @@ class WechatPayTools
             || !array_key_exists("prepay_id", $UnifiedOrderResult)
             || $UnifiedOrderResult['prepay_id'] == "")
         {
-            throw new \Exception("参数错误");
+            throw new WechatException("参数错误");
         }
         $data = [];
         $data['appId'] = $UnifiedOrderResult["appid"];
@@ -74,12 +76,12 @@ class WechatPayTools
      * @param int $second   url执行超时时间，默认30s
      * @throws WxPayException
      */
-    public static function postXmlCurl($config, $data, $url, $useCert = false, $second = 30)
+    public static function postXmlCurl($data, $url, $useCert = false, $second = 30)
     {
         $ch = curl_init();
         $curlVersion = curl_version();
         $ua = "WXPaySDK/3.0.9 (".PHP_OS.") PHP/".PHP_VERSION." CURL/".$curlVersion['version']." "
-            .$config['mch_id'];
+            .$data['mch_id'];
 
         //设置超时
         curl_setopt($ch, CURLOPT_TIMEOUT, $second);
@@ -112,7 +114,7 @@ class WechatPayTools
             curl_setopt($ch,CURLOPT_SSLKEY, $sslKeyPath);
         }
         //post提交方式
-        $xml = WechatPayTools::arrayToXml($data);
+        $xml = Tools::arrayToXml($data);
         curl_setopt($ch, CURLOPT_POST, TRUE);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
         //运行curl
@@ -125,7 +127,7 @@ class WechatPayTools
         } else {
             $error = curl_errno($ch);
             curl_close($ch);
-            throw new \Exception("curl出错，错误码:$error");
+            throw new WechatException("curl出错，错误码:$error");
         }
     }
 
@@ -163,7 +165,7 @@ class WechatPayTools
         } else if(self::GetSignType() == "HMAC-SHA256") {
             $string = hash_hmac("sha256",$string ,self::GetKey());
         } else {
-            throw new \Exception("签名类型不支持！");
+            throw new WechatException("签名类型不支持！");
         }
 
         //签名步骤四：所有字符转为大写
@@ -221,7 +223,7 @@ class WechatPayTools
     public static function CheckSign($data, $check_sign)
     {
         if(!self::IsSignSet($data)){
-            throw new \Exception("签名错误！");
+            throw new WechatException("签名错误！");
         }
 
         $sign = self::MakeSign($data, false);
@@ -229,7 +231,7 @@ class WechatPayTools
             //签名正确
             return true;
         }
-        throw new \Exception("签名错误！");
+        throw new WechatException("签名错误！");
     }
 
     /**
@@ -252,18 +254,18 @@ class WechatPayTools
     {
         try {
             $response = Tools::xmlToArray($response);
+            WechatPayTools::CheckSign($data, $sign);
             //失败则直接返回失败
             if($response['return_code'] != 'SUCCESS') {
                 foreach ($response as $key => $value) {
                     #除了return_code和return_msg之外其他的参数存在，则报错
                     if($key != "return_code" && $key != "return_msg"){
-                        throw new \Exception("输入数据存在异常！");
+                        throw new \app\component\WechatException("输入数据存在异常！");
                     }
                 }
             }
-            WechatPayTools::CheckSign($data, $sign);
-        } catch (\Exception $e) {
-            return [];
+        } catch (\app\component\WechatException $e) {
+            return ['return_code' => $response['return_code'], 'return_msg' => $e->getMessage()];
         }
         return $response;
     }

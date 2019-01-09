@@ -71,6 +71,14 @@ class Tools
     }
 
     /**
+     * 获取秒级时间戳
+     */
+    public static function getTimeSecond()
+    {
+        return time();
+    }
+
+    /**
      * array转xml
      * @throws WxPayException
      **/

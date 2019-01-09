@@ -34,7 +34,8 @@ class PayController extends CommonController
         $channel_id = Yii::$app->request->post('channel_id', 0);
         $scene_id = Yii::$app->request->post('scene_id', 0);
         $pay_info = Yii::$app->request->post('pay_info', '');
-        $ret = (new PayHandleService())->main($channel_id, $scene_id, $pay_info);
+        $biz_order_id = Yii::$app->request->post('biz_order_id', '');
+        $ret = (new PayHandleService())->main($channel_id, $scene_id, $pay_info, $biz_order_id);
         $this->code = $ret['code'];
         $this->msg = $ret['msg'];
         $this->data = $ret['data'];
