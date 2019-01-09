@@ -42,6 +42,14 @@ class PayCallBackService extends CommonService
      */
     public function mian($service_id, $order_id)
     {
+        $event_data = [
+            'pay_order_id' => $order_id,
+            'event_type' => 20,
+            'event_data' => '',
+            'create_time' => Tools::getTimeSecond(),
+        ];
+        PayEventDao::addEvent($event_data);
+
         try {
             //设置服务
             $this->setService($service_id);
