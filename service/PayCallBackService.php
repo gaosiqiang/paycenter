@@ -40,20 +40,20 @@ class PayCallBackService extends CommonService
      * 处理回调
      * @param $channel_id
      */
-    public function mian($service_id, $order_id)
+    public function mian()
     {
-        $event_data = [
-            'pay_order_id' => $order_id,
-            'event_type' => 20,
-            'event_data' => '',
-            'create_time' => Tools::getTimeSecond(),
-        ];
-        PayEventDao::addEvent($event_data);
-
+        $service_id = 200100;
         try {
             //设置服务
             $this->setService($service_id);
+            //获取回调数据
+            $call_back_data = $this->service->getCallBackData();
+            if (!$call_back_data) {
+                throw new ServiceException('参数错误', 100010);
+            }
             //获取创建支付订单参数
+            $attach = $call_back_data['attach'];
+            $order_id = json_decode($attach, 1)['order_id'];
             $order_info = $this->getOrderById($order_id);
             if (!$order_info || !isset($order_info['params']) || $order_info['params'] == '') {
                 throw new ServiceException('参数错误', 100010);
