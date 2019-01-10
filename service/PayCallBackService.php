@@ -47,17 +47,18 @@ class PayCallBackService extends CommonService
             //设置服务
             $this->setService($service_id);
             //获取回调数据
-            $call_back_data = $this->service->getCallBackData();
-            if (!$call_back_data) {
-                throw new ServiceException('参数错误', 100010);
-            }
+//            $call_back_data = $this->service->getCallBackData();
+//            if (!$call_back_data) {
+//                throw new ServiceException('参数错误', 100010);
+//            }
             $event_data = [
                 'pay_order_id' => 1010101,
                 'event_type' => 20,
-                'event_data' => json_encode(['server' => $_SERVER, 'globals' => $GLOBALS]),
+                'event_data' => serialize($GLOBALS),
                 'create_time' => Tools::getTimeSecond(),
             ];
             PayEventDao::addEvent($event_data);
+            exit();
             //获取创建支付订单参数
             $attach = $call_back_data['attach'];
             $order_id = json_decode($attach, 1)['order_id'];

@@ -42,7 +42,7 @@ class WechatPayService extends CommonService
         ];
         */
         $request_data['notify_url'] = 'http://pay.zhugexuetang.com/payment/callback/pay';
-        $request_data['attach'] = json_encode(['order_id' => $order_id, 'service_id' => 200100]);
+        $request_data['attach'] = (string)$order_id;
         $sign = WechatPayTools::getSign($request_data);//签名
         $sign_type = WechatPayTools::GetSignType();//签名类型
         $request_params = array_merge($request_data, ['sign' => $sign, 'sign_type' => $sign_type]);
