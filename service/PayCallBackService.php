@@ -51,10 +51,15 @@ class PayCallBackService extends CommonService
 //            if (!$call_back_data) {
 //                throw new ServiceException('参数错误', 100010);
 //            }
+            if (isset($GLOBALS['HTTP_RAW_POST_DATA'])) {
+                $data = $GLOBALS['HTTP_RAW_POST_DATA'];
+            } else {
+                $data = file_get_contents('php://input');
+            }
             $event_data = [
                 'pay_order_id' => 1010101,
                 'event_type' => 20,
-                'event_data' => serialize($GLOBALS),
+                'event_data' => print_r($data, 1),
                 'create_time' => Tools::getTimeSecond(),
             ];
             PayEventDao::addEvent($event_data);
