@@ -47,9 +47,9 @@ class PayCallBackService extends CommonService
             $this->setService($service_id);
             //获取回调数据
             $call_back_data = $this->service->getCallBackData();
-            if (!$call_back_data) {
-                throw new ServiceException('参数错误', 100010);
-            }
+//            if (!$call_back_data) {
+//                throw new ServiceException('参数错误', 100010);
+//            }
             //添加记录
             $event_data = [
                 'pay_order_id' => 1010101,
