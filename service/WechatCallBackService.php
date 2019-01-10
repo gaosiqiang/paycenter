@@ -65,7 +65,7 @@ class WechatCallBackService extends CommonService
         }
         $request_data = [];
         //验证$data["transaction_id"]微信的订单号
-        if (!$this->Queryorder($request_data, $data["transaction_id"])) {
+        if (!$this->Queryorder($sign_config, $data["transaction_id"])) {
             return 0;
         }
         return 1;
