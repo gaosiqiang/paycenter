@@ -41,7 +41,7 @@ class WechatPayService extends CommonService
             'product_id' => '1',//商品id，NATIVE场景使用
         ];
         */
-        $request_data['notify_url'] = 'http://pay.zhugexuetang.com/payment/callback/pay';
+        $request_data['notify_url'] = 'http://pay.zhugexuetang.com/payment/callback/wechat';
         $request_data['attach'] = (string)$order_id;
         $sign = WechatPayTools::getSign($request_data);//签名
         $sign_type = WechatPayTools::GetSignType();//签名类型
