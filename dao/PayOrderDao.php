@@ -70,4 +70,24 @@ class PayOrderDao
         return $ret;
     }
 
+    /**
+     * 更新订单支付状态
+     * @param $order_id
+     * @param $order_status
+     * @param $handle_status
+     * @return int
+     * @throws \yii\db\Exception
+     */
+    public static function updatOrderPayStatusById($order_id, $order_status, $handle_status)
+    {
+        $connection  = Yii::$app->db;
+        $table_name = PayOrder::tableName();
+        $sql = "update $table_name set order_status=$order_status,handle_status=$handle_status where id=$order_id";
+        $ret = $connection->createCommand($sql)->execute();
+        if (!$ret) {
+            return 0;
+        }
+        return 1;
+    }
+
 }

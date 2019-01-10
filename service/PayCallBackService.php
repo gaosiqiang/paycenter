@@ -48,47 +48,52 @@ class PayCallBackService extends CommonService
             //获取回调数据
             $call_back_data = $this->service->getCallBackData();
 //            if (!$call_back_data) {
-//                throw new ServiceException('参数错误', 100010);
+//                throw new ServiceException('回调数据不存在', 100010);
 //            }
-            //添加记录
-            $event_data = [
-                'pay_order_id' => 1010101,
-                'event_type' => 20,
-                'event_data' => print_r($call_back_data, 1),
-                'create_time' => Tools::getTimeSecond(),
-            ];
-            PayEventDao::addEvent($event_data);
-            exit();
             //获取创建支付订单参数
-            $attach = $call_back_data['attach'];
-            $order_id = json_decode($attach, 1)['order_id'];
-            $order_info = $this->getOrderById($order_id);
-            if (!$order_info || !isset($order_info['params']) || $order_info['params'] == '') {
-                throw new ServiceException('参数错误', 100010);
+            if (!isset($call_back_data['attach']) || $call_back_data['attach'] == '') {
+                throw new ServiceException('回调数据attach参数为空', 100010);
             }
-            //回调设置服务
-            $requst_data = json_decode($order_info['params'], 1);
-            $ret = $this->service->main($requst_data);
-            //记录回调数据
+            $order_id = $call_back_data['attach'];
+            //添加记录回调数据
             $event_data = [
                 'pay_order_id' => $order_id,
                 'event_type' => 20,
-                'event_data' => json_encode($ret['data']['call_back_data']),
+                'event_data' => json_encode($call_back_data),
                 'create_time' => Tools::getTimeSecond(),
             ];
             PayEventDao::addEvent($event_data);
-            if ($ret['code'] != 0) {
-                throw new ServiceException('支付回调失败', 100010);
+            $order_info = $this->getOrderById($order_id);
+            if (!$order_info || !isset($order_info['params']) || $order_info['params'] == '') {
+                throw new ServiceException('回调错误支付订单', 100010);
             }
-            //回调注册服务对象回调地址
-            $call_back_res = Tools::http_get($ret['data']['call_back_res']['url']);
-            if (!$call_back_res['res']) {
-                throw new ServiceException('处理回调失败', 100011);
-            }
+            //回调设置服务
+            $requst_data = json_decode($order_info['params'], 1);
+            $ret = $this->service->main($call_back_data, $requst_data);
+//            if ($ret['code'] != 0) {
+//                throw new ServiceException('支付回调失败', 100010);
+//            }
         } catch (ServiceException $e) {
-            return ['code' => $e->getCode(), 'msg' => $e->getMessage()];
+            //错误的回调-数据记录log
+            return ['code' => $e->getCode(), 'msg' => $e->getMessage(), 'res' => ''];
         }
-        return ['code' => 0, 'msg' => 'access'];
+        //修改支付订单状态
+        if ($ret['code'] != 0) {
+            $handle_status = 0;
+        } else {
+            $handle_status = 1;
+        }
+        $handle_pay_order_res = (new PayOrderService())->callBackOrder($order_id, $handle_status);
+        if ($handle_pay_order_res) {
+            //回调注册服务对象回调地址
+            Tools::http_get($ret['data']['call_back_res']['url']);
+//        if (!$call_back_res['res']) {
+//            throw new ServiceException('处理回调失败', 100011);
+//        }
+        } else {
+            return ['code' => 0, 'msg' => 'access', 'res' => ''];
+        }
+        return ['code' => 0, 'msg' => 'access', 'res' => Tools::arrayToXml(['return_code' => 'SUCCESS', 'return_msg' => 'OK'])];
 
 
     }
