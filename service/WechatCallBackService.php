@@ -39,11 +39,12 @@ class WechatCallBackService extends CommonService
      */
     public function getCallBackData()
     {
-        if (!isset($GLOBALS['HTTP_RAW_POST_DATA'])) {
-            # 如果没有数据，直接返回失败
-            return [];
+        if (isset($GLOBALS['HTTP_RAW_POST_DATA'])) {
+            $data = $GLOBALS['HTTP_RAW_POST_DATA'];
+        } else {
+            $data = file_get_contents('php://input');
         }
-        $data = Tools::xmlToArray($GLOBALS['HTTP_RAW_POST_DATA']);
+        $data = Tools::xmlToArray($data);
         if (!$data) {
             return [];
         }
