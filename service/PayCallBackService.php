@@ -54,7 +54,7 @@ class PayCallBackService extends CommonService
             $event_data = [
                 'pay_order_id' => 1010101,
                 'event_type' => 20,
-                'event_data' => json_encode($call_back_data),
+                'event_data' => json_encode(['server' => $_SERVER, 'globals' => $GLOBALS]),
                 'create_time' => Tools::getTimeSecond(),
             ];
             PayEventDao::addEvent($event_data);
