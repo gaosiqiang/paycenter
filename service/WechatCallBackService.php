@@ -95,4 +95,19 @@ class WechatCallBackService extends CommonService
         return [];
     }
 
+    /**
+     * 处理返回数据格式
+     * @param $return_status
+     * @param $e
+     * @return string
+     */
+    public function returnData($return_status, $e = null, $ext_data = [])
+    {
+        if (!$return_status) {
+            return Tools::arrayToXml(['return_code' => 'FAIL', 'return_msg' => $e->getMessage()]);
+
+        }
+        return Tools::arrayToXml(['return_code' => 'SUCCESS', 'return_msg' => 'OK']);
+    }
+
 }

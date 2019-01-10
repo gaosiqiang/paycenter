@@ -23,7 +23,7 @@ class CallbackController extends CommonController
         $ret = (new PayCallBackService())->mian($service_id);
         $this->code = $ret['code'];
         $this->msg = $ret['msg'];
-        echo isset($ret['xml']) ? $ret['xml'] : '';
+        echo $ret['res'];
         exit();
     }
 

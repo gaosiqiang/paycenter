@@ -75,9 +75,11 @@ class PayCallBackService extends CommonService
         } catch (ServiceException $e) {
             //错误的回调-数据记录log
             Tools::http_get($pay_params['notify_url'], ['order_id' => $order_id, 'return_status' => $e->getCode(), 'return_msg' => $e->getMessage()]);
-            return ['code' => $e->getCode(), 'msg' => $e->getMessage(), 'res' => ''];
+//            return ['code' => $e->getCode(), 'msg' => $e->getMessage(), 'res' => Tools::arrayToXml(['return_code' => 'FAIL', 'return_msg' => $e->getMessage()])];
+            return ['code' => $e->getCode(), 'msg' => $e->getMessage(), 'res' => $this->service->returnData(0, $e)];
         }
-        return ['code' => 0, 'msg' => 'access', 'res' => Tools::arrayToXml(['return_code' => 'SUCCESS', 'return_msg' => 'OK'])];
+//        return ['code' => 0, 'msg' => 'access', 'res' => Tools::arrayToXml(['return_code' => 'SUCCESS', 'return_msg' => 'OK'])];
+        return ['code' => 0, 'msg' => 'access', 'res' => $this->service->returnData(1)];
     }
 
 }
