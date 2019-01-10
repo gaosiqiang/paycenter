@@ -47,13 +47,10 @@ class PayCallBackService extends CommonService
             $this->setService($service_id);
             //获取回调数据
             $call_back_data = $this->service->getCallBackData();
-//            if (!$call_back_data) {
-//                throw new ServiceException('回调数据不存在', 100010);
-//            }
             //获取创建支付订单参数
-            if (!isset($call_back_data['attach']) || $call_back_data['attach'] == '') {
-                throw new ServiceException('回调数据attach参数为空', 100010);
-            }
+//            if (!isset($call_back_data['attach']) || $call_back_data['attach'] == '') {
+//                throw new ServiceException('回调数据attach参数为空', 100010);
+//            }
             $order_id = $call_back_data['attach'];
             //添加记录回调数据
             $event_data = [
@@ -62,17 +59,22 @@ class PayCallBackService extends CommonService
                 'event_data' => json_encode($call_back_data),
                 'create_time' => Tools::getTimeSecond(),
             ];
-            PayEventDao::addEvent($event_data);
+            (new PayEventService())->addONeEvent($event_data);
+            /*
             $order_info = $this->getOrderById($order_id);
             if (!$order_info || !isset($order_info['params']) || $order_info['params'] == '') {
                 throw new ServiceException('回调错误支付订单', 100010);
             }
-            //回调设置服务
             $requst_data = json_decode($order_info['params'], 1);
-            $ret = $this->service->main($call_back_data, $requst_data);
-//            if ($ret['code'] != 0) {
-//                throw new ServiceException('支付回调失败', 100010);
-//            }
+            */
+
+            /*
+            $evnet_data = (new PayEventService())->getEventByPayOrderId($order_id, 20);
+            $call_back_data = json_decode($evnet_data['event_data'], 1);
+            $call_back_check_res = $this->service->checkCallBackData($call_back_data);
+            print_r($call_back_check_res);die();
+            */
+            $ret = $this->service->main($call_back_data);
         } catch (ServiceException $e) {
             //错误的回调-数据记录log
             return ['code' => $e->getCode(), 'msg' => $e->getMessage(), 'res' => ''];

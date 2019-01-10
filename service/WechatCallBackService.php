@@ -57,40 +57,41 @@ class WechatCallBackService extends CommonService
      * @param $sign_config 生成签名数据
      * @return int
      */
-    public function checkCallBackData($data, $sign_config)
+    public function checkCallBackData($data)
     {
         //验证签名是否一致
-        if ($data['sign'] != WechatPayTools::MakeSign($sign_config, false)) {
+        if ($data['sign'] != WechatPayTools::MakeSign($data, false)) {
             return 0;
         }
-        $request_data = [];
         //验证$data["transaction_id"]微信的订单号
-        if (!$this->Queryorder($sign_config, $data["transaction_id"])) {
+        if (!$this->Queryorder($data, $data["transaction_id"])) {
             return 0;
         }
         return 1;
     }
 
     //查询订单
-    public function Queryorder($request_data, $transaction_id)
+    public function Queryorder($data)
     {
         $url = "https://api.mch.weixin.qq.com/pay/orderquery";
-        $config['mch_id'] = $request_data['mch_id'];
-        $response = WechatPayTools::postXmlCurl($config, array_merge($request_data, ['transaction_id' => $transaction_id]), $url, false, 30);
-        $response = Tools::xmlToArray($response);
+        $request_data['appid'] = $data['appid'];
+        $request_data['mch_id'] = $data['mch_id'];
+        $request_data['transaction_id'] = $data['transaction_id'];
+        $request_data['out_trade_no'] = $data['out_trade_no'];
+        $request_data['nonce_str'] = WechatPayTools::getNonceStr();
+        $sign = WechatPayTools::getSign($request_data);
+        $sign_type = WechatPayTools::GetSignType();//签名类型
+        $response = WechatPayTools::postXmlCurl(array_merge($request_data, ['sign' => $sign, 'sign_type' => $sign_type]), $url,false, 30);
+        //$response = Tools::xmlToArray($response);
         //验证签名
-        $result = WechatPayTools::InitResults($request_data, $response, $response['sign'], WechatPayTools::getSign($request_data));
+        $result = WechatPayTools::InitResults(array_merge($request_data, ['sign' => $sign, 'sign_type' => $sign_type]), $response, $sign);
         if (!$result) {
-            return 0;
+            return [];
         }
-        if(array_key_exists("return_code", $result)
-            && array_key_exists("result_code", $result)
-            && $result["return_code"] == "SUCCESS"
-            && $result["result_code"] == "SUCCESS")
-        {
-            return 1;
+        if(array_key_exists("return_code", $result) && array_key_exists("result_code", $result) && $result["return_code"] == "SUCCESS" && $result["result_code"] == "SUCCESS") {
+            return $result;
         }
-        return 0;
+        return [];
     }
 
 }
