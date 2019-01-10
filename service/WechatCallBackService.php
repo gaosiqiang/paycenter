@@ -21,14 +21,10 @@ class WechatCallBackService extends CommonService
     public function main($data)
     {
         //获取回调数据
-//        $data = $this->getCallBackData();
-//        if (!$data) {
-//            return ['code' => 100010, 'msg' => 'error', 'data' => ['call_back_data' => $data]];
-//        }
         //分析验证回调数据
         $ret = $this->checkCallBackData($data);
         if (!$ret) {
-            return ['code' => 100010, 'msg' => 'error', 'data' => ['call_back_data' => $data]];
+            return ['code' => 100010, 'msg' => 'error', 'data' => ['call_back_res' => (object)[], 'call_back_data' => $data]];
         }
         return ['code' => 0, 'msg' => 'access', 'data' => ['call_back_res' => $ret, 'call_back_data' => $data]];
     }
@@ -70,7 +66,12 @@ class WechatCallBackService extends CommonService
         return 1;
     }
 
-    //查询订单
+    /**
+     * 查询支付订单状态
+     * @param $data
+     * @return array
+     * @throws \Exception
+     */
     public function Queryorder($data)
     {
         $url = "https://api.mch.weixin.qq.com/pay/orderquery";

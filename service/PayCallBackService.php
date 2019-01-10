@@ -52,6 +52,11 @@ class PayCallBackService extends CommonService
                 throw new ServiceException('回调数据attach参数为空', 100010);
             }
             $order_id = $call_back_data['attach'];
+            $order_info = (new PayOrderService())->getOrderById($order_id);
+            if (!$order_info) {
+                throw new ServiceException('支付订单错误', 100011);
+            }
+            $pay_params = json_decode($order_info['params'], 1);
             //添加记录回调数据
             $event_data = [
                 'pay_order_id' => $order_id,
@@ -60,55 +65,19 @@ class PayCallBackService extends CommonService
                 'create_time' => Tools::getTimeSecond(),
             ];
             (new PayEventService())->addONeEvent($event_data);
-            /*
-            $order_info = $this->getOrderById($order_id);
-            if (!$order_info || !isset($order_info['params']) || $order_info['params'] == '') {
-                throw new ServiceException('回调错误支付订单', 100010);
-            }
-            $requst_data = json_decode($order_info['params'], 1);
-            */
-
-            /*
-            $evnet_data = (new PayEventService())->getEventByPayOrderId($order_id, 20);
-            $call_back_data = json_decode($evnet_data['event_data'], 1);
-            $call_back_check_res = $this->service->checkCallBackData($call_back_data);
-            print_r($call_back_check_res);die();
-            */
             $ret = $this->service->main($call_back_data);
+            //修改支付订单状态
+            $handle_pay_order_res = (new PayOrderService())->callBackOrder($order_id, ($ret['code'] != 0) ? 0 : 1);
+            if (!$handle_pay_order_res) {
+                throw new ServiceException('修改支付订单状态失败', 100012);
+            }
+            Tools::http_get($pay_params['notify_url'], ['order_id' => $order_id, 'return_status' => 0, 'return_msg' => 'access']);
         } catch (ServiceException $e) {
             //错误的回调-数据记录log
+            Tools::http_get($pay_params['notify_url'], ['order_id' => $order_id, 'return_status' => $e->getCode(), 'return_msg' => $e->getMessage()]);
             return ['code' => $e->getCode(), 'msg' => $e->getMessage(), 'res' => ''];
         }
-        //修改支付订单状态
-        if ($ret['code'] != 0) {
-            $handle_status = 0;
-        } else {
-            $handle_status = 1;
-        }
-        $handle_pay_order_res = (new PayOrderService())->callBackOrder($order_id, $handle_status);
-        if ($handle_pay_order_res) {
-            //回调注册服务对象回调地址
-            Tools::http_get($ret['data']['call_back_res']['url']);
-//        if (!$call_back_res['res']) {
-//            throw new ServiceException('处理回调失败', 100011);
-//        }
-        } else {
-            return ['code' => 0, 'msg' => 'access', 'res' => ''];
-        }
         return ['code' => 0, 'msg' => 'access', 'res' => Tools::arrayToXml(['return_code' => 'SUCCESS', 'return_msg' => 'OK'])];
-
-
-    }
-
-    /**
-     * 获取订单数据
-     * @param $order_id
-     * @return array|false
-     * @throws \yii\db\Exception
-     */
-    public function getOrderById($order_id)
-    {
-        return PayOrderDao::getOrderById($order_id);
     }
 
 }

@@ -76,7 +76,7 @@ class PayHandleService extends CommonService
             if (!$order_id) {
                 throw new ServiceException('创建支付订单失败', 100010);
             }
-            $this->addEvent($order_id);
+            $this->addEvent($order_id, $pay_params);
         } catch (ServiceException $e) {
             return ['code' => $e->getCode(), 'msg' => $e->getMessage()];
         }
@@ -113,15 +113,15 @@ class PayHandleService extends CommonService
      * @param $order_id
      * @return int
      */
-    public function addEvent($order_id)
+    public function addEvent($order_id, $pay_params)
     {
         $insert_data = [
             'pay_order_id' => $order_id,
             'event_type' => 10,
-            'event_data' => '',
+            'event_data' => is_string($pay_params) ? $pay_params : json_encode($pay_params),
             'create_time' => Tools::getTimeSecond(),
         ];
-        return PayEventDao::addEvent($insert_data);
+        return (new PayEventService())->addONeEvent($insert_data);
     }
 
 }

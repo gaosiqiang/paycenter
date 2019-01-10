@@ -31,11 +31,28 @@ class PayOrderService extends CommonService
             $handle_status = 10;
         }
         $order_status = 10;
+        //获取当前支付订单是否已经支付完成&支付状态
+        $order_info = $this->getOrderById($order_id);
+        //如果需要修改的状态与目前数据状态一致则不更新数据库
+        if ($order_info && $order_info['order_status'] == $order_status && $order_info['handle_status'] == $handle_status) {
+            return 1;
+        }
         $res = PayOrderDao::updatOrderPayStatusById($order_id, $order_status, $handle_status);
         if (!$res) {
             return 0;
         }
         return 1;
+    }
+
+    /**
+     * 获取订单数据
+     * @param $order_id
+     * @return array|false
+     * @throws \yii\db\Exception
+     */
+    public function getOrderById($order_id)
+    {
+        return PayOrderDao::getOrderById($order_id);
     }
 
 }
