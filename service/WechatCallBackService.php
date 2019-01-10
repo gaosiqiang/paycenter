@@ -18,7 +18,7 @@ class WechatCallBackService extends CommonService
     /**
      * 服务入口函数
      */
-    public function main($data, $params)
+    public function main($data)
     {
         //获取回调数据
 //        $data = $this->getCallBackData();
@@ -26,7 +26,7 @@ class WechatCallBackService extends CommonService
 //            return ['code' => 100010, 'msg' => 'error', 'data' => ['call_back_data' => $data]];
 //        }
         //分析验证回调数据
-        $ret = $this->checkCallBackData($data, $params);
+        $ret = $this->checkCallBackData($data);
         if (!$ret) {
             return ['code' => 100010, 'msg' => 'error', 'data' => ['call_back_data' => $data]];
         }

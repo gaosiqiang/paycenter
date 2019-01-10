@@ -48,9 +48,9 @@ class PayCallBackService extends CommonService
             //获取回调数据
             $call_back_data = $this->service->getCallBackData();
             //获取创建支付订单参数
-//            if (!isset($call_back_data['attach']) || $call_back_data['attach'] == '') {
-//                throw new ServiceException('回调数据attach参数为空', 100010);
-//            }
+            if (!isset($call_back_data['attach']) || $call_back_data['attach'] == '') {
+                throw new ServiceException('回调数据attach参数为空', 100010);
+            }
             $order_id = $call_back_data['attach'];
             //添加记录回调数据
             $event_data = [
