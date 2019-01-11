@@ -55,4 +55,15 @@ class PayOrderService extends CommonService
         return PayOrderDao::getOrderById($order_id);
     }
 
+    /**
+     * 创建订单
+     * @param $insert_data
+     * @return int|string
+     * @throws \yii\db\Exception
+     */
+    public function createOneOrder($insert_data)
+    {
+        return PayOrderDao::createOrder($insert_data);
+    }
+
 }

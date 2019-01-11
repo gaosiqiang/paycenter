@@ -63,6 +63,20 @@ return [
     'pay_refund_service_dict' => [
         200100 => '\app\service\WechatRefundService',
     ],
+    /**
+     * 退款回调服务集合
+     */
+    'pay_refund_call_back_service_set' => [
+        200100,
+    ],
+    /**
+     * 退款回调服务字典
+     */
+    'pay_refund_call_back_service_dict' => [
+        200100 => '\app\service\WechatRefundCallBackService',
+    ],
+
+
     //service list
     'qrcode_service_url' => 'http://qrcode.zyuwen.cn/img/qrcode?code=',
 

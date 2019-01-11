@@ -8,6 +8,7 @@
 
 namespace app\modules\payment\controllers;
 
+use app\service\RefundService;
 use Yii;
 use app\component\CommonController;
 use app\service\PayHandleService;
@@ -21,8 +22,14 @@ class PayController extends CommonController
     public function actionRefund()
     {
         $channel_id = Yii::$app->request->post('channel_id', 0);
-        $refund_info = Yii::$app->request->post('refund_info', '');
-
+        $scene_id = Yii::$app->request->post('scene_id', 0);
+        $biz_order_id = Yii::$app->request->post('biz_order_id', '');
+        $refund_params = Yii::$app->request->post('refund_params', '');
+        $ret = (new RefundService())->main($channel_id, $scene_id, $biz_order_id, $refund_params);
+        $this->code = $ret['code'];
+        $this->msg = $ret['msg'];
+        $this->data = $ret['data'];
+        $this->echoJson();
     }
 
     /**

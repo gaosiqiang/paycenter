@@ -76,7 +76,7 @@ class WechatPayTools
      * @param int $second   url执行超时时间，默认30s
      * @throws WxPayException
      */
-    public static function postXmlCurl($data, $url, $useCert = false, $second = 30)
+    public static function postXmlCurl($data, $url, $useCert = false, $second = 30, $sslCertPath = '', $sslKeyPath = '')
     {
         $ch = curl_init();
         $curlVersion = curl_version();
@@ -106,8 +106,8 @@ class WechatPayTools
             //设置证书
             //使用证书：cert 与 key 分别属于两个.pem文件
             //证书文件请放入服务器的非web目录下，也就是不要放在虚拟目录下
-            $sslCertPath = "";
-            $sslKeyPath = "";
+            //$sslCertPath = "";
+            //$sslKeyPath = "";
             curl_setopt($ch,CURLOPT_SSLCERTTYPE,'PEM');
             curl_setopt($ch,CURLOPT_SSLCERT, $sslCertPath);
             curl_setopt($ch,CURLOPT_SSLKEYTYPE,'PEM');
