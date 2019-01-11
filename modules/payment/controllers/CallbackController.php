@@ -33,7 +33,7 @@ class CallbackController extends CommonController
      */
     public function actionWechatrefund()
     {
-        $service_id = 200100;
+        $service_id = 200200;
         $ret = (new RefundCallBackService())->main($service_id);
         $this->code = $ret['code'];
         $this->msg = $ret['msg'];

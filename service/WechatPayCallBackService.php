@@ -12,7 +12,7 @@ use app\component\Tools;
 use app\component\WechatPayTools;
 use app\service\CommonService;
 
-class WechatCallBackService extends CommonService
+class WechatPayCallBackService extends CommonService
 {
 
     /**

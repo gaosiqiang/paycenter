@@ -2,6 +2,8 @@
 
 return [
     'adminEmail' => 'admin@example.com',
+    'site_name' => 'paycenter',
+    'site_url' => 'http://pay.zhugexuetang.com',
     /**
      * 支付频道集合
      */
@@ -13,7 +15,8 @@ return [
      * 支付服务集合
      */
     'pay_service_id_set' => [
-        200100,
+        100100, //支付宝支付服务
+        200100, //微信支付服务
     ],
     /**
      * 支付场景集合
@@ -49,35 +52,42 @@ return [
         200103 => 'handleApp', //app支付
     ],
     'pay_call_back_serbice_dict' => [
-        200100 => '\app\service\WechatCallBackService',
+        200100 => '\app\service\WechatPayCallBackService',
     ],
     /**
      * 退款服务集合
      */
     'pay_refund_service_set' => [
-        200100,
+        200200, //微信退款服务
     ],
     /**
      * 退款服务字典
      */
     'pay_refund_service_dict' => [
-        200100 => '\app\service\WechatRefundService',
+        200200 => '\app\service\WechatRefundService',
     ],
     /**
      * 退款回调服务集合
      */
     'pay_refund_call_back_service_set' => [
-        200100,
+        200200,
     ],
     /**
      * 退款回调服务字典
      */
     'pay_refund_call_back_service_dict' => [
-        200100 => '\app\service\WechatRefundCallBackService',
+        200200 => '\app\service\WechatRefundCallBackService',
     ],
-
-
-    //service list
+    /**
+     * 回调地址
+     */
+    'call_back_url' => [
+        200100 => 'payment/callback/wechat',//支付回调
+        200200 => '',//退款回调
+    ],
+    /**
+     * service list
+     */
     'qrcode_service_url' => 'http://qrcode.zyuwen.cn/img/qrcode?code=',
 
 ];
