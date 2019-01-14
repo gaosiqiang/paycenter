@@ -8,11 +8,13 @@
 
 namespace app\modules\payment\controllers;
 
+use app\service\AliPayService;
 use app\service\RefundService;
 use Yii;
 use app\component\CommonController;
 use app\service\PayHandleService;
 use app\service\WechatPayService;
+use app\service\AliRefundService;
 
 class PayController extends CommonController
 {
@@ -47,6 +49,13 @@ class PayController extends CommonController
         $this->msg = $ret['msg'];
         $this->data = $ret['data'];
         $this->echoJson();
+    }
+
+    public function actionAlirefund()
+    {
+        $ret = (new AliRefundService())->refund();
+        print_r($ret);
+        die();
     }
 
 }
