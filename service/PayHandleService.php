@@ -80,7 +80,7 @@ class PayHandleService extends CommonService
         } catch (ServiceException $e) {
             return ['code' => $e->getCode(), 'msg' => $e->getMessage()];
         }
-        $ret = $this->service->handle($this->scene, $pay_params, $order_id);
+        $ret = $this->service->handle($this->scene, $pay_params, $order_id, $biz_order_id);
         if ($ret['code'] != 0) {
             return ['code' => $ret['code'], 'msg' => '支付失败!:'.$ret['msg'], 'data' => ['action_pay_data' => $ret['data']]];
         }

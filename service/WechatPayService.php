@@ -89,7 +89,7 @@ class WechatPayService extends CommonService
     /**
      * 处理支付数据
      */
-    public function handle($call_back, $pay_params, $order_id)
+    public function handle($call_back, $pay_params, $order_id, $biz_order_id)
     {
         $request_data = $this->getBaseParams();
         $this->setParams($call_back, $pay_params,$request_data);
