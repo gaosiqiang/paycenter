@@ -51,11 +51,19 @@ class PayController extends CommonController
         $this->echoJson();
     }
 
-    public function actionAlirefund()
+    /**
+     * 获取退款详情
+     */
+    public function actionGetrefundinfo()
     {
-        $ret = (new AliRefundService())->refund();
-        print_r($ret);
-        die();
+        $channel_id = Yii::$app->request->post('channel_id', 0);
+        $biz_order_id = Yii::$app->request->post('biz_order_id', 0);
+        $params = Yii::$app->request->post('params', '');
+        $ret = (new RefundService())->getRefundInfo($channel_id, $biz_order_id, $params);
+        $this->code = $ret['code'];
+        $this->msg = $ret['msg'];
+        $this->data = $ret['data'];
+        $this->echoJson();
     }
 
 }

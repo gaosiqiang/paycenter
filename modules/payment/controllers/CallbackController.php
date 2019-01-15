@@ -41,4 +41,17 @@ class CallbackController extends CommonController
         exit();
     }
 
+    /**
+     * 阿里支付回调
+     */
+    public function actionAlipay()
+    {
+        $service_id = 100100;
+        $ret = (new PayCallBackService())->mian($service_id);
+        $this->code = $ret['code'];
+        $this->msg = $ret['msg'];
+        echo $ret['res'];
+        exit();
+    }
+
 }

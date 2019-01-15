@@ -5,6 +5,7 @@
  * Date: 2019/1/2
  * Time: 5:42 PM
  */
-ini_set("display_errors", "On");
-error_reporting(E_ALL | E_STRICT);
+//ini_set("display_errors", "On");
+//error_reporting(E_ALL | E_STRICT);
+error_reporting(E_ALL^E_NOTICE);
 defined('LIB_PATH') or define('LIB_PATH', __DIR__ . '/../library');

@@ -127,8 +127,10 @@ class AopClient {
 			$res = openssl_get_privatekey($priKey);
 		}
 
-		($res) or die('您使用的私钥格式错误，请检查RSA私钥配置'); 
-
+		($res) or die('您使用的私钥格式错误，请检查RSA私钥配置');
+//		print_r($data);
+//		print_r($res);
+//		die();
 		if ("RSA2" == $signType) {
 			openssl_sign($data, $sign, $res, OPENSSL_ALGO_SHA256);
 		} else {
@@ -1019,7 +1021,6 @@ class AopClient {
 	 * @throws Exception
 	 */
 	public function checkResponseSign($request, $signData, $resp, $respObject) {
-
 		if (!$this->checkEmpty($this->alipayPublicKey) || !$this->checkEmpty($this->alipayrsaPublicKey)) {
 
 

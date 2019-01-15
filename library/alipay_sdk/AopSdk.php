@@ -30,7 +30,7 @@ if (!defined("AOP_SDK_DEV_MODE"))
 /**
  * 定义常量结束
  */
-
+require dirname(__FILE__) . DIRECTORY_SEPARATOR . "lotusphp_runtime" . DIRECTORY_SEPARATOR . "Lotus.php";
 class AopSdk
 {
 	public function init()
@@ -39,9 +39,9 @@ class AopSdk
 		 * 找到lotusphp入口文件，并初始化lotusphp
 		 * lotusphp是一个第三方php框架，其主页在：lotusphp.googlecode.com
 		 */
-		$lotusHome = dirname(__FILE__) . DIRECTORY_SEPARATOR . "lotusphp_runtime" . DIRECTORY_SEPARATOR;
-		include($lotusHome . "Lotus.php");
-		$lotus = new Lotus;
+//		$lotusHome = dirname(__FILE__) . DIRECTORY_SEPARATOR . "lotusphp_runtime" . DIRECTORY_SEPARATOR;
+//		include($lotusHome . "Lotus.php");
+		$lotus = new \Lotus;
 		$lotus->option["autoload_dir"] = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'aop';
 		$lotus->devMode = AOP_SDK_DEV_MODE;
 		$lotus->defaultStoreDir = AOP_SDK_WORK_DIR;
