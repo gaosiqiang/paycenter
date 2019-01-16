@@ -114,23 +114,29 @@ class RefundService extends CommonService
         (new AopSdk())->init();
         $aop = new \AopClient();
         $aop->gatewayUrl = 'https://openapi.alipay.com/gateway.do';
-        $aop->appId = $params['app_id'];
-        $aop->rsaPrivateKey = $params['private_key'];//私钥
-        $aop->alipayrsaPublicKey= $params['public_key'];//公钥，一行字符串
+        $aop->appId = '2015121100962151';
+//        $aop->rsaPrivateKey = 'MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBANJOh5oVNIeJcHh/S3alPNqTsnAJTdF2zFcpHlnHrfW00nWRyaOjfRcKveCRts1moB20IeAcYGxhq5wagiikLqZJMjbONVqa+u+e1+6NRx/po2AK8X2V/efEKKSk6nU8DUAZqBU3d3JGR4Zw+gQOkvWippaVrNfOTBYHY2rlkkofAgMBAAECgYAOrYhtSpmV9BOzdT7xEutCXhiQFTYnLmFom+gQYA1WHr6pkfk+wIRUfV1vNPxLLaRzLkVG/PQF3HM7u+XlrD/NHt4xTEK8xz7oqu7y8By5ArOYn4rIXHDT3vptNSvl9zVwi/hUTThVWNaR8RBWeRcwxyX/stTZq1n7kt0JFkem4QJBAOuqzcQc3JJ3t/9erq1RC1YH+nMVkJvqBgpkIMsOXt8o5gOzL2wObHvLilPXDY9NBmIanb6pyBQMbAfCXnhfjrcCQQDkc5aSi4Fkbi2OtFwGCfE8mRV+mDWONzyEeA04YnXIfyysIImyE7HicYfxk9JC9Tw+76kYIOusKgIoVw+ZXzfZAkAE02SPRYAGx8jOw+OTzPsMcfFg9eoWJz6ka9R4E/1BWJcNMFgiQFFcX5ifiuHOM2eUDrN4OgXM00xLBGHm2R4VAkEAzk84rtU/oCQEDnkBFg8KhdA14iKxUuK9S2BjiAUbG1sGS9gCogg5QCeJPnhhjUiNBMVIrtqkGtHBKw8crkSYWQJBAN5REJYxbIY2+oiKHm3lcy4NIhZTGbGRtuHRGJIZaTdzbERWLW/fTpOhKhoSRja3LPrEqnu1Irk1z3G7KIM3aSA=';
+        $aop->rsaPrivateKey = 'MIICXQIBAAKBgQDSToeaFTSHiXB4f0t2pTzak7JwCU3RdsxXKR5Zx631tNJ1kcmjo30XCr3gkbbNZqAdtCHgHGBsYaucGoIopC6mSTI2zjVamvrvntfujUcf6aNgCvF9lf3nxCikpOp1PA1AGagVN3dyRkeGcPoEDpL1oqaWlazXzkwWB2Nq5ZJKHwIDAQABAoGADq2IbUqZlfQTs3U+8RLrQl4YkBU2Jy5haJvoEGANVh6+qZH5PsCEVH1dbzT8Sy2kcy5FRvz0BdxzO7vl5aw/zR7eMUxCvMc+6Kru8vAcuQKzmJ+KyFxw0976bTUr5fc1cIv4VE04VVjWkfEQVnkXMMcl/7LU2atZ+5LdCRZHpuECQQDrqs3EHNySd7f/Xq6tUQtWB/pzFZCb6gYKZCDLDl7fKOYDsy9sDmx7y4pT1w2PTQZiGp2+qcgUDGwHwl54X463AkEA5HOWkouBZG4tjrRcBgnxPJkVfpg1jjc8hHgNOGJ1yH8srCCJshOx4nGH8ZPSQvU8Pu+pGCDrrCoCKFcPmV832QJABNNkj0WABsfIzsPjk8z7DHHxYPXqFic+pGvUeBP9QViXDTBYIkBRXF+Yn4rhzjNnlA6zeDoFzNNMSwRh5tkeFQJBAM5POK7VP6AkBA55ARYPCoXQNeIisVLivUtgY4gFGxtbBkvYAqIIOUAniT54YY1IjQTFSK7apBrRwSsPHK5EmFkCQQDeURCWMWyGNvqIih5t5XMuDSIWUxmxkbbh0RiSGWk3c2xEVi1v306ToSoaEkY2tyz6xKp7tSK5Nc9xuyiDN2kg';
+        $aop->alipayrsaPublicKey = 'zrrydg5u81lqjqia2dtii3nomsdhxood';
         $aop->apiVersion = '1.0';
         $aop->signType = 'RSA2';
         $aop->postCharset='UTF-8';
         $aop->format='json';
-        //var_dump($aop);die();
         $request = new \AlipayTradeFastpayRefundQueryRequest();
         $biz_content = [
             'trade_no' => '',//支付宝交易号
             'out_trade_no' => $order_id,//创建交易传入的商户订单号
             'out_request_no' => $params['out_request_no'],//本笔退款对应的退款请求号
-            'org_pid' => '', //该参数指定需要查询的交易所属收单机构的pid
         ];
+        //$request->setBizContent(json_encode($biz_content, JSON_UNESCAPED_UNICODE));
+        $out_request_no = $params['out_request_no'];
+        $request->setBizContent("{" .
+            "\"trade_no\":\"\"," .
+            "\"out_trade_no\":\"$order_id\"," .
+            "\"out_request_no\":\"$out_request_no\"," .
+            "\"org_pid\":\"\"" .
+            "  }");
 
-        $request->setBizContent(json_encode($biz_content));
         $result = $aop->execute($request);
         $responseNode = str_replace(".", "_", $request->getApiMethodName()) . "_response";
         $resultCode = $result->$responseNode->code;
