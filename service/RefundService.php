@@ -100,7 +100,10 @@ class RefundService extends CommonService
         }
         $function_id = $this->refund_service_dict[$service_id];
         $ret = $this->$function_id($order_id, json_decode($params, 1));
-        return $ret;
+        if (!$ret) {
+            return ['code' => 100012, 'msg' => '退款失败', 'data' => (object)[]];
+        }
+        return ['code' => 0, 'msg' => 'access', 'data' => (object)[]];
     }
 
     /**
@@ -128,13 +131,6 @@ class RefundService extends CommonService
             'out_request_no' => 'a7bbabd609be43f385aae03d3df2e265',//本笔退款对应的退款请求号
         ];
         $request->setBizContent(json_encode($biz_content, JSON_UNESCAPED_UNICODE));
-//        $out_request_no = $params['out_request_no'];
-//        $request->setBizContent("{" .
-//            "\"trade_no\":\"\"," .
-//            "\"out_trade_no\":\"\"," .
-//            "\"out_request_no\":\"$out_request_no\"," .
-//            "\"org_pid\":\"\"" .
-//            "  }");
 
         $result = $aop->execute($request);
         $responseNode = str_replace(".", "_", $request->getApiMethodName()) . "_response";
@@ -161,14 +157,13 @@ class RefundService extends CommonService
         $request_data['mch_id'] = '1446999202';
         $request_data['nonce_str'] = WechatPayTools::getNonceStr();
         $request_data['out_trade_no'] = 'aaaaaa';
-        //$request_data['sign_type'] = WechatPayTools::GetSignType();
         $request_params = $request_data;
         $request_params['sign'] = WechatPayTools::getSign($request_data);
-        //$request_params['sign_type'] = WechatPayTools::GetSignType();
+        $request_params['sign_type'] = WechatPayTools::GetSignType();
         $response = WechatPayTools::postXmlCurl($request_params, $url, false, $time_out);
         //$response = Tools::xmlToArray($response);
         //验证签名
-        $result = WechatPayTools::InitResults(array_merge($request_data, ['sign' => $sign, 'sign_type' => $sign_type]), $response, $sign);
+        $result = WechatPayTools::InitResults($request_params, $response, $request_params['sign']);
 
         if (!$result) {
             return [];

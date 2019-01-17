@@ -60,7 +60,6 @@ class PayController extends CommonController
         $biz_order_id = Yii::$app->request->post('biz_order_id', 0);
         $params = Yii::$app->request->post('params', '');
         $ret = (new RefundService())->getRefundInfo($channel_id, $biz_order_id, $params);
-        print_r($ret);die();
         $this->code = $ret['code'];
         $this->msg = $ret['msg'];
         $this->data = $ret['data'];
