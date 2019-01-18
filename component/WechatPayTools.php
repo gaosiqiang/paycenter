@@ -139,7 +139,7 @@ class WechatPayTools
      */
     public static function getSign($data, $key = '')
     {
-        $sign = self::MakeSign($data, true, $key);
+        $sign = self::MakeSign($data, false, $key);
         return $sign;
     }
 
@@ -151,9 +151,9 @@ class WechatPayTools
      */
     public static function MakeSign($data, $needSignType = true, $key = '')
     {
-//        if($needSignType) {
-//            $data['sign_type'] = self::GetSignType();
-//        }
+        if($needSignType) {
+            $data['sign_type'] = self::GetSignType();
+        }
         //签名步骤一：按字典序排序参数
         ksort($data);
         //签名步骤二：在string后加入KEY

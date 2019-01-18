@@ -66,7 +66,7 @@ class PayController extends CommonController
         $ret = (new RefundService())->getRefundInfo($channel_id, $biz_order_id, $app_id, $merchant_id, $private_key, $public_key, $refund_id);
         $this->code = $ret['code'];
         $this->msg = $ret['msg'];
-        //$this->data = $ret['data'];
+        $this->data = isset($ret['data']) ? $ret['data'] : [];
         $this->echoJson();
     }
 
