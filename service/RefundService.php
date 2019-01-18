@@ -90,20 +90,20 @@ class RefundService extends CommonService
      * @param $params
      * @return array
      */
-    public function getRefundInfo($service_id, $order_id, $params)
+    public function getRefundInfo($service_id, $order_id, $app_id, $merchant_id, $private_key, $public_key, $refund_id)
     {
-        if (!$service_id || !$order_id || !$params) {
-            return ['code' => 100010, 'msg' => 'params error', 'data' => (object)[]];
+        if (!$service_id || !$order_id || !$app_id) {
+            return ['code' => 100010, 'msg' => 'params error'];
         }
         if (!in_array($service_id, $this->refund_service_set)) {
-            return ['code' => 100011, 'msg' => 'params error', 'data' => (object)[]];
+            return ['code' => 100011, 'msg' => 'params error'];
         }
         $function_id = $this->refund_service_dict[$service_id];
-        $ret = $this->$function_id($order_id, json_decode($params, 1));
+        $ret = $this->$function_id($order_id, $app_id, $merchant_id, $private_key, $public_key, $refund_id);
         if (!$ret) {
-            return ['code' => 100012, 'msg' => '退款失败', 'data' => (object)[]];
+            return ['code' => 100012, 'msg' => '退款失败'];
         }
-        return ['code' => 0, 'msg' => 'access', 'data' => (object)[]];
+        return ['code' => 0, 'msg' => 'access'];
     }
 
     /**
@@ -112,14 +112,17 @@ class RefundService extends CommonService
      * @param $params
      * @return array
      */
-    public function getAliRefundInfo($order_id, $params)
+    public function getAliRefundInfo($order_id, $app_id, $merchant_id, $private_key, $public_key, $refund_id)
     {
         (new AopSdk())->init();
         $aop = new \AopClient();
         $aop->gatewayUrl = 'https://openapi.alipay.com/gateway.do';
-        $aop->appId = '2019010362727917';
-        $aop->rsaPrivateKey = 'MIIEpAIBAAKCAQEAxDwSWFrV8+375Vcoq2Jtk2wOFfjMQtybqX5cxI1bWMCI0lt6/eZ4t0aTkheCz67TBNScbYqxvGj/oaRub8hxua8JDrsNg/9RzRVA3fDGVXYbq6AS3QL4RQBEoKxZ+SWAA7d9498BNpuQFLCXnFkvrth2sI2w7moPd939fWhvh9oI/b3lKwIIkD/Sm+SZlcgX22l+lCnOsUOMTkB4fkb2HrirvwrhC65/pPPgmECkEVr6vFZQsDMDUWV3Arf3SD1UBrnqbzFOm/c8IyRobFnMkpJgOm11g1MKj4xIlTgAc7FZ43qt5ma/Y9DaBqzFW5f3wrvCH/+9melPx/BUV9+HBwIDAQABAoIBAGwPTGbdNn5J6fGDyoB+BistUKBmzkxvYUS3sewGj2vTMkTsXVEdrhH2ymKjkcQ92DQLxExKGM/Q3hwsCSiDL6T5rzouZSXv3iLZ9kuBQCZlkJ00285ayU5t9FyqLC2XqePiEm/+KJPinDfYetR9BFX7G3jjva+8NeJjGykI7onW3VvcTuyg9uxUcf33pGoCtMy++wky9MMz0T5mMLgZ74a22k4rk3l/uOpokc0ZeV1iLVo29ypKXEPj64y+O0NViy8xMFWSPuNwWaOGRvwP2jjuoVanhY285zEJdC0Lwhptn7va4bxjhGznU/ww5iDfxrZIonCdgJpEp9qMgcHkfPkCgYEA/hHpXtPFtmDkreDvurBFbNB9rzkt42MKEz+/OQStL5t5IFFr4UqsBV1KzWFJwZOQ7m74nMPjn6XuYBPoFiS40tiuZqyqqYcZWbh41noMpUIjGiLmb8xG2QTedgJg4P2zj76cP9qA+ITHfuNfgdfaBDWkyFuGkRPw0h/MagBrQf0CgYEAxbmwJLK6td5v4C6iUB6ZQWNEHMJb2Ijrco6yZgMnlfIKQfBJGv/055rr366m/lzvYFZF9ww6O3uf89m1z3411x0A6cRlAPzz3euVEqDs0FAjRXVj/ibEp8N+cz1QReKuWPhAxV+g2ZLyDe2BRYRA35FvhtXqtk2uazu71hf+SlMCgYEAzqBcji1mpytn7213Kfo/i/6HqOC0zC/4uqzmZIXEH2qu+LSfKutiuT4lHqDXriHIBdGkSUIatfTpx6OI5bFZyshEFeapKRRhbpFTXQKHlEMUbyYhCJ02pTqLfafziCdsSCQ5yMh4iSTbZfue6edVPIUwDW46I3T3LryDr1XF5TUCgYEAuy8WVTeq0KAbM5WSbdz541AxXDSXtL+yfkofE7oq0KZKFbB/1QK5fEVKxgDW8PlUWNRz+fRmcIeRns3dc+ic2eAITEZ0BGJ0EASFpRQZ/P/Q1GHU3vcet1+4pypFg1OdEHc9Al2Mrk2Rv6O3/PK+Y6iQd4quYBXcaIItSfp+7ycCgYATlm0BcPD9fWSB9zZGiBfA11/l/YY2EY71OUDObphTRm70UL5rVYN9pjqCE3US2PbaUeXu4trYUAQ/j0MP0i61iECbA55wJed3YYxgTLxcuPm7BkrpmYu6qxPWTrUqJw+HDRV/l/PQhbkVC1YNn1yp+dQrGKz+yDec9Se5NieNpA==';
-        $aop->alipayrsaPublicKey = 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAihcTMZBlNzvS1j7l8O6xN+ukhZPrm/dGl6SXiaOK0fAbXU3/h3SNqjk0CqR7Vtxq5K5pCJgNdBo1O+KKTSNeBT3o3X3rZriVB7x09rBDqdaVT2ZyEg/lMmv+MZUIcwgPYv6dlIXZDRpQ2R7hZb90frAplEfZinhCr5AEJni2Jg9UeZL6sr6iYbPnzoWqNiy7lLtNMqDXH7BN+mF/cF/bYNQmgFg+9X+HjVf10QMHkHymi9P4pMZEJHli/X+TtJbdVtwevjGOZUJ8+aS9tRE7Q1yuezz9QXfsoOIvdgJAWN65IEKPo6KCNJAN6RWAjk6XnTMwoma40sbE0cDE7+yY3wIDAQAB';
+        //$aop->appId = '2019010362727917';
+        $aop->appId = $app_id;
+        //$aop->rsaPrivateKey = 'MIIEpAIBAAKCAQEAxDwSWFrV8+375Vcoq2Jtk2wOFfjMQtybqX5cxI1bWMCI0lt6/eZ4t0aTkheCz67TBNScbYqxvGj/oaRub8hxua8JDrsNg/9RzRVA3fDGVXYbq6AS3QL4RQBEoKxZ+SWAA7d9498BNpuQFLCXnFkvrth2sI2w7moPd939fWhvh9oI/b3lKwIIkD/Sm+SZlcgX22l+lCnOsUOMTkB4fkb2HrirvwrhC65/pPPgmECkEVr6vFZQsDMDUWV3Arf3SD1UBrnqbzFOm/c8IyRobFnMkpJgOm11g1MKj4xIlTgAc7FZ43qt5ma/Y9DaBqzFW5f3wrvCH/+9melPx/BUV9+HBwIDAQABAoIBAGwPTGbdNn5J6fGDyoB+BistUKBmzkxvYUS3sewGj2vTMkTsXVEdrhH2ymKjkcQ92DQLxExKGM/Q3hwsCSiDL6T5rzouZSXv3iLZ9kuBQCZlkJ00285ayU5t9FyqLC2XqePiEm/+KJPinDfYetR9BFX7G3jjva+8NeJjGykI7onW3VvcTuyg9uxUcf33pGoCtMy++wky9MMz0T5mMLgZ74a22k4rk3l/uOpokc0ZeV1iLVo29ypKXEPj64y+O0NViy8xMFWSPuNwWaOGRvwP2jjuoVanhY285zEJdC0Lwhptn7va4bxjhGznU/ww5iDfxrZIonCdgJpEp9qMgcHkfPkCgYEA/hHpXtPFtmDkreDvurBFbNB9rzkt42MKEz+/OQStL5t5IFFr4UqsBV1KzWFJwZOQ7m74nMPjn6XuYBPoFiS40tiuZqyqqYcZWbh41noMpUIjGiLmb8xG2QTedgJg4P2zj76cP9qA+ITHfuNfgdfaBDWkyFuGkRPw0h/MagBrQf0CgYEAxbmwJLK6td5v4C6iUB6ZQWNEHMJb2Ijrco6yZgMnlfIKQfBJGv/055rr366m/lzvYFZF9ww6O3uf89m1z3411x0A6cRlAPzz3euVEqDs0FAjRXVj/ibEp8N+cz1QReKuWPhAxV+g2ZLyDe2BRYRA35FvhtXqtk2uazu71hf+SlMCgYEAzqBcji1mpytn7213Kfo/i/6HqOC0zC/4uqzmZIXEH2qu+LSfKutiuT4lHqDXriHIBdGkSUIatfTpx6OI5bFZyshEFeapKRRhbpFTXQKHlEMUbyYhCJ02pTqLfafziCdsSCQ5yMh4iSTbZfue6edVPIUwDW46I3T3LryDr1XF5TUCgYEAuy8WVTeq0KAbM5WSbdz541AxXDSXtL+yfkofE7oq0KZKFbB/1QK5fEVKxgDW8PlUWNRz+fRmcIeRns3dc+ic2eAITEZ0BGJ0EASFpRQZ/P/Q1GHU3vcet1+4pypFg1OdEHc9Al2Mrk2Rv6O3/PK+Y6iQd4quYBXcaIItSfp+7ycCgYATlm0BcPD9fWSB9zZGiBfA11/l/YY2EY71OUDObphTRm70UL5rVYN9pjqCE3US2PbaUeXu4trYUAQ/j0MP0i61iECbA55wJed3YYxgTLxcuPm7BkrpmYu6qxPWTrUqJw+HDRV/l/PQhbkVC1YNn1yp+dQrGKz+yDec9Se5NieNpA==';
+        $aop->rsaPrivateKey = $private_key;
+        //$aop->alipayrsaPublicKey = 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAihcTMZBlNzvS1j7l8O6xN+ukhZPrm/dGl6SXiaOK0fAbXU3/h3SNqjk0CqR7Vtxq5K5pCJgNdBo1O+KKTSNeBT3o3X3rZriVB7x09rBDqdaVT2ZyEg/lMmv+MZUIcwgPYv6dlIXZDRpQ2R7hZb90frAplEfZinhCr5AEJni2Jg9UeZL6sr6iYbPnzoWqNiy7lLtNMqDXH7BN+mF/cF/bYNQmgFg+9X+HjVf10QMHkHymi9P4pMZEJHli/X+TtJbdVtwevjGOZUJ8+aS9tRE7Q1yuezz9QXfsoOIvdgJAWN65IEKPo6KCNJAN6RWAjk6XnTMwoma40sbE0cDE7+yY3wIDAQAB';
+        $aop->alipayrsaPublicKey = $public_key;
         //$aop->apiVersion = '1.0';
         $aop->signType = 'RSA2';
         $aop->postCharset='UTF-8';
@@ -127,8 +130,10 @@ class RefundService extends CommonService
         $request = new \AlipayTradeFastpayRefundQueryRequest();
         $biz_content = [
             //'trade_no' => '',//支付宝交易号
-            'out_trade_no' => '1546594821',//创建交易传入的商户订单号
-            'out_request_no' => 'a7bbabd609be43f385aae03d3df2e265',//本笔退款对应的退款请求号
+            //'out_trade_no' => '1546594821',//创建交易传入的商户订单号
+            'out_trade_no' => $order_id,//创建交易传入的商户订单号
+            //'out_request_no' => 'a7bbabd609be43f385aae03d3df2e265',//本笔退款对应的退款请求号
+            'out_request_no' => $refund_id,//本笔退款对应的退款请求号
         ];
         $request->setBizContent(json_encode($biz_content, JSON_UNESCAPED_UNICODE));
 
@@ -149,22 +154,25 @@ class RefundService extends CommonService
      * @return array
      * @throws \Exception
      */
-    public function getWechatRefundInfo($order_id, $params)
+    public function getWechatRefundInfo($order_id, $app_id, $merchant_id, $private_key, $public_key, $refund_id)
     {
         $url = "https://api.mch.weixin.qq.com/pay/refundquery";
         $time_out = 30;
-        $request_data['appid'] = 'wxbb93dfb3536660f6';
-        $request_data['mch_id'] = '1446999202';
-        $request_data['nonce_str'] = WechatPayTools::getNonceStr();
-        $request_data['out_trade_no'] = 'aaaaaa';
+        //$request_data['appid'] = 'wxbb93dfb3536660f6';
+        $request_data['appid'] = $app_id;
+        //$request_data['mch_id'] = '1446999202';
+        $request_data['mch_id'] = $merchant_id;
+        //$request_data['nonce_str'] = WechatPayTools::getNonceStr();
+        $request_data['nonce_str'] = 'zi7ywg8f3oh6fkk99ixq3qmc5ybguvzi';
+        $request_data['out_trade_no'] = $order_id;
+        $request_data['refund_id'] = $refund_id;
         $request_params = $request_data;
-        $request_params['sign'] = WechatPayTools::getSign($request_data);
-        $request_params['sign_type'] = WechatPayTools::GetSignType();
+        $request_params['sign'] = WechatPayTools::getSign($request_data, $private_key);
+        //var_dump(Tools::arrayToXml($request_params));die();
         $response = WechatPayTools::postXmlCurl($request_params, $url, false, $time_out);
-        //$response = Tools::xmlToArray($response);
+        //var_dump($response);die();
         //验证签名
         $result = WechatPayTools::InitResults($request_params, $response, $request_params['sign']);
-
         if (!$result) {
             return [];
         }

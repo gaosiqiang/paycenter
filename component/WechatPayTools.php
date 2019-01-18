@@ -137,9 +137,9 @@ class WechatPayTools
      * @return 签名，本函数不覆盖sign成员变量，如要设置签名需要调用SetSign方法赋值
      * @throws \Exception
      */
-    public static function getSign($data)
+    public static function getSign($data, $key = '')
     {
-        $sign = self::MakeSign($data);
+        $sign = self::MakeSign($data, true, $key);
         return $sign;
     }
 
@@ -149,7 +149,41 @@ class WechatPayTools
      * @param bool $needSignType  是否需要补signtype
      * @return 签名，本函数不覆盖sign成员变量，如要设置签名需要调用SetSign方法赋值
      */
-    public static function MakeSign($data, $needSignType = true)
+    public static function MakeSign($data, $needSignType = true, $key = '')
+    {
+//        if($needSignType) {
+//            $data['sign_type'] = self::GetSignType();
+//        }
+        //签名步骤一：按字典序排序参数
+        ksort($data);
+        //签名步骤二：在string后加入KEY
+        $string = self::ToUrlParams($data);
+        if ($key === '') {
+            $key = self::GetKey();
+        }
+        $string = $string . "&key=". $key;
+        //签名步骤三：MD5加密或者HMAC-SHA256
+        if(self::GetSignType() == "MD5"){
+            $string = md5($string);
+        } else if(self::GetSignType() == "HMAC-SHA256") {
+            $string = hash_hmac("sha256", $string , $key);
+        } else {
+            throw new WechatException("签名类型不支持！");
+        }
+        //签名步骤四：所有字符转为大写
+        $result = strtoupper($string);
+        return $result;
+    }
+
+
+
+    /**
+     * 生成签名 - 重写该方法
+     * @param WxPayConfigInterface $config  配置对象
+     * @param bool $needSignType  是否需要补signtype
+     * @return 签名，本函数不覆盖sign成员变量，如要设置签名需要调用SetSign方法赋值
+     */
+    public function MakeSign2($data, $needSignType = false)
     {
         if($needSignType) {
             $data['sign_type'] = self::GetSignType();
@@ -159,20 +193,17 @@ class WechatPayTools
         $string = self::ToUrlParams($data);
         //签名步骤二：在string后加入KEY
         $string = $string . "&key=".self::GetKey();
-        //签名步骤三：MD5加密或者HMAC-SHA256
-        if(self::GetSignType() == "MD5"){
-            $string = md5($string);
-        } else if(self::GetSignType() == "HMAC-SHA256") {
-            $string = hash_hmac("sha256",$string ,self::GetKey());
-        } else {
-            throw new WechatException("签名类型不支持！");
-        }
-
+        //签名步骤三：MD5加密
+        $string = md5($string);
         //签名步骤四：所有字符转为大写
         $result = strtoupper($string);
         return $result;
     }
 
+    /**
+     * 获取签名类型
+     * @return string
+     */
     public static function GetSignType()
     {
         return "HMAC-SHA256";
@@ -220,13 +251,13 @@ class WechatPayTools
      * @param WxPayConfigInterface $config  配置对象
      * 检测签名
      */
-    public static function CheckSign($data, $check_sign)
+    public static function CheckSign($data, $check_sign, $key = '')
     {
         if(!self::IsSignSet($data)){
             throw new WechatException("签名错误！");
         }
 
-        $sign = self::MakeSign($data, false);
+        $sign = self::MakeSign($data, false, $key);
         if($check_sign == $sign){
             //签名正确
             return true;

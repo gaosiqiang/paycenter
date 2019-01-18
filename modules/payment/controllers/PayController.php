@@ -58,11 +58,15 @@ class PayController extends CommonController
     {
         $channel_id = Yii::$app->request->post('channel_id', 0);
         $biz_order_id = Yii::$app->request->post('biz_order_id', 0);
-        $params = Yii::$app->request->post('params', '');
-        $ret = (new RefundService())->getRefundInfo($channel_id, $biz_order_id, $params);
+        $app_id = Yii::$app->request->post('app_id', '');
+        $merchant_id = Yii::$app->request->post('merchant_id', '');
+        $private_key = Yii::$app->request->post('private_key', '');
+        $public_key = Yii::$app->request->post('public_key', '');
+        $refund_id = Yii::$app->request->post('refund_id', '');
+        $ret = (new RefundService())->getRefundInfo($channel_id, $biz_order_id, $app_id, $merchant_id, $private_key, $public_key, $refund_id);
         $this->code = $ret['code'];
         $this->msg = $ret['msg'];
-        $this->data = $ret['data'];
+        //$this->data = $ret['data'];
         $this->echoJson();
     }
 
