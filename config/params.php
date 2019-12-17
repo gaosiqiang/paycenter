@@ -3,7 +3,7 @@
 return [
     'adminEmail' => 'admin@example.com',
     'site_name' => 'paycenter',
-    'site_url' => 'http://pay.zhugexuetang.com',
+    'site_url' => 'http://pay.matrixfeature.com',
     /**
      * 支付频道集合
      */
