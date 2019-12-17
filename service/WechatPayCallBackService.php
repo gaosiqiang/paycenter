@@ -18,11 +18,11 @@ class WechatPayCallBackService extends CommonService
     /**
      * 服务入口函数
      */
-    public function main($data)
+    public function main($data, $key)
     {
         //获取回调数据
         //分析验证回调数据
-        $ret = $this->checkCallBackData($data);
+        $ret = $this->checkCallBackData($data, $key);
         if (!$ret) {
             return ['code' => 100010, 'msg' => 'error', 'data' => ['call_back_res' => (object)[], 'call_back_data' => $data]];
         }
@@ -53,10 +53,10 @@ class WechatPayCallBackService extends CommonService
      * @param $sign_config 生成签名数据
      * @return int
      */
-    public function checkCallBackData($data)
+    public function checkCallBackData($data, $key)
     {
         //验证签名是否一致
-        if ($data['sign'] != WechatPayTools::MakeSign($data, false)) {
+        if ($data['sign'] != WechatPayTools::MakeSign($data, false, $key)) {
             return 0;
         }
         //验证$data["transaction_id"]微信的订单号

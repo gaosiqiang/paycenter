@@ -65,7 +65,7 @@ class PayCallBackService extends CommonService
                 'create_time' => Tools::getTimeSecond(),
             ];
             (new PayEventService())->addONeEvent($event_data);
-            $ret = $this->service->main($call_back_data);
+            $ret = $this->service->main($call_back_data, $pay_params['key']);
             //修改支付订单状态
             $handle_pay_order_res = (new PayOrderService())->callBackOrder($order_id, ($ret['code'] != 0) ? 0 : 1);
             if (!$handle_pay_order_res) {
