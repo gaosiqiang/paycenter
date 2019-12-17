@@ -60,7 +60,7 @@ class WechatPayCallBackService extends CommonService
             return 0;
         }
         //验证$data["transaction_id"]微信的订单号
-        if (!$this->Queryorder($data, $data["transaction_id"])) {
+        if (!$this->Queryorder($data, $key)) {
             return 0;
         }
         return 1;
@@ -72,7 +72,7 @@ class WechatPayCallBackService extends CommonService
      * @return array
      * @throws \Exception
      */
-    public function Queryorder($data)
+    public function Queryorder($data, $key)
     {
         $url = "https://api.mch.weixin.qq.com/pay/orderquery";
         $request_data['appid'] = $data['appid'];
@@ -80,12 +80,13 @@ class WechatPayCallBackService extends CommonService
         $request_data['transaction_id'] = $data['transaction_id'];
         $request_data['out_trade_no'] = $data['out_trade_no'];
         $request_data['nonce_str'] = WechatPayTools::getNonceStr();
-        $sign = WechatPayTools::getSign($request_data);
         $sign_type = WechatPayTools::GetSignType();//签名类型
+        $request_data['sign_type'] = $sign_type;
+        $sign = WechatPayTools::getSign($request_data, $key);
         $response = WechatPayTools::postXmlCurl(array_merge($request_data, ['sign' => $sign, 'sign_type' => $sign_type]), $url,false, 30);
         //$response = Tools::xmlToArray($response);
         //验证签名
-        $result = WechatPayTools::InitResults(array_merge($request_data, ['sign' => $sign, 'sign_type' => $sign_type]), $response, $sign);
+        $result = WechatPayTools::InitResults(array_merge($request_data, ['sign' => $sign, 'sign_type' => $sign_type]), $response, $sign, $key);
         if (!$result) {
             return [];
         }
