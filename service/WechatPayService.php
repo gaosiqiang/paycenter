@@ -19,7 +19,7 @@ class WechatPayService extends CommonService
      * 获取支付接口相应数据
      * @throws \Exception
      */
-    public function getPayApiData($request_data, $order_id)
+    public function getPayApiData($request_data, $order_id, $key = '')
     {
         $url = "https://api.mch.weixin.qq.com/pay/unifiedorder";
         $time_out = 30;
@@ -27,10 +27,10 @@ class WechatPayService extends CommonService
         $request_data['attach'] = (string)$order_id;
         $sign_type = WechatPayTools::GetSignType();//签名类型
         $request_data['sign_type'] = $sign_type;
-        $sign = WechatPayTools::getSign($request_data);//签名
+        $sign = WechatPayTools::getSign($request_data, $key);//签名
         $request_params = array_merge($request_data, ['sign' => $sign, 'sign_type' => $sign_type]);
         $response = WechatPayTools::postXmlCurl($request_params, $url, false, $time_out);
-        $result = WechatPayTools::InitResults(array_merge($request_data, ['sign' => $sign, 'sign_type' => $sign_type]), $response, $sign);
+        $result = WechatPayTools::InitResults(array_merge($request_data, ['sign' => $sign, 'sign_type' => $sign_type]), $response, $sign, $key);
         return $result;
     }
 
@@ -104,7 +104,8 @@ class WechatPayService extends CommonService
     {
         $request_data = $this->getBaseParams();
         $this->setParams($call_back, $pay_params,$request_data);
-        $result = $this->getPayApiData($request_data, $order_id);
+        $key = $this->getKey($pay_params);
+        $result = $this->getPayApiData($request_data, $order_id, $key);
         return $this->$call_back($request_data, $result);
     }
 
@@ -169,5 +170,10 @@ class WechatPayService extends CommonService
             'product_id' => '1',//商品id，NATIVE场景使用
         ];
         */
+
+    public function getKey($pay_params)
+    {
+        return isset($pay_params['key']) ? $pay_params['key'] : '';
+    }
 
 }

@@ -30,9 +30,9 @@ class WechatPayTools
         $data['appId'] = $UnifiedOrderResult["appid"];
         $timeStamp = time();
         $data['timeStamp'] = "$timeStamp";
-        $data['nonceStr'] = WechatSignTools::getNonceStr();
+        $data['nonceStr'] = self::getNonceStr();
         $data['package'] = "prepay_id=" . $UnifiedOrderResult['prepay_id'];
-        $data['paySign'] = WechatSignTools::MakeSign($config);;
+        $data['paySign'] = self::MakeSign($config);;
         $parameters = json_encode($data);
         return $parameters;
     }
@@ -48,7 +48,7 @@ class WechatPayTools
         $data["url"] = "http://".$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
         $time = time();
         $data["timestamp"] = "$time";
-        $data["noncestr"] = WechatSignTools::getNonceStr();
+        $data["noncestr"] = self::getNonceStr();
         $data["accesstoken"] = $config["access_token"];
 
         ksort($data);
@@ -281,11 +281,11 @@ class WechatPayTools
      * @param $sign
      * @return array
      */
-    public static function InitResults($data, $response, $sign)
+    public static function InitResults($data, $response, $sign, $key = '')
     {
         try {
             $response = Tools::xmlToArray($response);
-            WechatPayTools::CheckSign($data, $sign);
+            WechatPayTools::CheckSign($data, $sign, $key);
             //失败则直接返回失败
             if($response['return_code'] != 'SUCCESS') {
                 foreach ($response as $key => $value) {
