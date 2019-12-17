@@ -228,7 +228,7 @@ class WechatPayTools
 
     public static function GetKey()
     {
-        return '8934e7d15453e97507ef794cf7b0519d';
+        return '';//这里的key可以获取配置文件数据
     }
 
     /**
