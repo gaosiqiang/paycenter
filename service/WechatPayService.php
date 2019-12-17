@@ -14,6 +14,8 @@ use app\service\WechatAuth;
 
 class WechatPayService extends CommonService
 {
+    public $key = '';
+
     const SERVICE_ID = 200100;
     /**
      * 获取支付接口相应数据
@@ -66,7 +68,7 @@ class WechatPayService extends CommonService
     {
         $access_token = '';
         if ($result['return_code'] == 'SUCCESS' && $requst_data['trade_type'] === 'JSAPI') {
-            $jsApiParameters = WechatPayTools::GetJsApiParameters($result, $requst_data);
+            $jsApiParameters = WechatPayTools::GetJsApiParameters($result, $this->key);
             //获取共享收货地址js函数参数
             $editAddress = WechatPayTools::GetEditAddressParameters(['appid' => $requst_data['appid'], 'access_token' => $access_token]);
         } else {
@@ -173,7 +175,8 @@ class WechatPayService extends CommonService
 
     public function getKey($pay_params)
     {
-        return isset($pay_params['key']) ? $pay_params['key'] : '';
+        $this->key = isset($pay_params['key']) ? $pay_params['key'] : '';
+        return $this->key;
     }
 
 }

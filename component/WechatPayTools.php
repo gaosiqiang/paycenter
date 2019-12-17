@@ -18,7 +18,7 @@ class WechatPayTools
      * @throws WxPayException
      * @return json数据，可直接填入js函数作为参数
      */
-    public static function GetJsApiParameters($UnifiedOrderResult, $config)
+    public static function GetJsApiParameters($UnifiedOrderResult, $key)
     {
         if(!array_key_exists("appid", $UnifiedOrderResult)
             || !array_key_exists("prepay_id", $UnifiedOrderResult)
@@ -32,7 +32,8 @@ class WechatPayTools
         $data['timeStamp'] = "$timeStamp";
         $data['nonceStr'] = self::getNonceStr();
         $data['package'] = "prepay_id=" . $UnifiedOrderResult['prepay_id'];
-        $data['paySign'] = self::MakeSign($config);;
+        $data['signType'] = self::GetSignType();
+        $data['paySign'] = self::MakeSign($data, false, $key);
         $parameters = json_encode($data);
         return $parameters;
     }
@@ -159,7 +160,7 @@ class WechatPayTools
         //签名步骤二：在string后加入KEY
         $string = self::ToUrlParams($data);
         if ($key === '') {
-            $key = self::GetKey();
+            $key = self::GetKey($data);
         }
         $string = $string . "&key=". $key;
         //签名步骤三：MD5加密或者HMAC-SHA256
@@ -226,9 +227,10 @@ class WechatPayTools
         return $buff;
     }
 
-    public static function GetKey()
+    public static function GetKey($data)
     {
-        return '';//这里的key可以获取配置文件数据
+        //return '';//这里的key可以获取配置文件数据
+        return isset($data['key']) ? $data['key'] : '';
     }
 
     /**
