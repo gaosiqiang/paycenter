@@ -2,9 +2,9 @@
 
 return [
     'class' => 'yii\db\Connection',
-    'dsn' => 'mysql:host=123.56.106.97;dbname=paycenter',
+    'dsn' => 'mysql:host=db.zwwl.com;dbname=paycenter',
     'username' => 'root',
-    'password' => 'gao1990',
+    'password' => 'zwwlzgxt',
     'charset' => 'utf8',
 
     // Schema cache options (for production environment)

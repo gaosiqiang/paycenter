@@ -25,8 +25,9 @@ class WechatPayService extends CommonService
         $time_out = 30;
         $request_data['notify_url'] = $this->config_params['site_url']. DIRECTORY_SEPARATOR. $this->config_params['call_back_url'][self::SERVICE_ID];
         $request_data['attach'] = (string)$order_id;
-        $sign = WechatPayTools::getSign($request_data);//签名
         $sign_type = WechatPayTools::GetSignType();//签名类型
+        $request_data['sign_type'] = $sign_type;
+        $sign = WechatPayTools::getSign($request_data);//签名
         $request_params = array_merge($request_data, ['sign' => $sign, 'sign_type' => $sign_type]);
         $response = WechatPayTools::postXmlCurl($request_params, $url, false, $time_out);
         $result = WechatPayTools::InitResults(array_merge($request_data, ['sign' => $sign, 'sign_type' => $sign_type]), $response, $sign);
@@ -64,12 +65,22 @@ class WechatPayService extends CommonService
     public function handleJsapi($requst_data, $result)
     {
         $access_token = '';
-        if ($requst_data['trade_type'] === 'JSAPI') {
+        if ($result['return_code'] == 'SUCCESS' && $requst_data['trade_type'] === 'JSAPI') {
             $jsApiParameters = WechatPayTools::GetJsApiParameters($result, $requst_data);
             //获取共享收货地址js函数参数
             $editAddress = WechatPayTools::GetEditAddressParameters(['appid' => $requst_data['appid'], 'access_token' => $access_token]);
+        } else {
+            return [
+                'code' => 100001,
+                'msg' => $result['return_msg'],
+                'data' => [],
+            ];
         }
-        return ['jsApiParameters' => $jsApiParameters, 'editAddress' => $editAddress];
+        return [
+            'code' => 0,
+            'msg' => $result['return_msg'],
+            'data' => ['jsApiParameters' => $jsApiParameters, 'editAddress' => $editAddress],
+        ];
     }
 
     /**
