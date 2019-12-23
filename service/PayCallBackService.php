@@ -71,10 +71,10 @@ class PayCallBackService extends CommonService
             if (!$handle_pay_order_res) {
                 throw new ServiceException('修改支付订单状态失败', 100012);
             }
-            Tools::http_get($pay_params['notify_url'], ['order_id' => $order_id, 'return_status' => 0, 'return_msg' => 'access']);
+            Tools::http_get($pay_params['notify_url'], ['pay_order_id' => $order_id, 'biz_order_id' => $order_info['biz_order_id'], 'return_status' => 0, 'return_msg' => 'access']);
         } catch (ServiceException $e) {
             //错误的回调-数据记录log
-            Tools::http_get($pay_params['notify_url'], ['order_id' => $order_id, 'return_status' => $e->getCode(), 'return_msg' => $e->getMessage()]);
+            Tools::http_get($pay_params['notify_url'], ['pay_order_id' => $order_id, 'biz_order_id' => $order_info['biz_order_id'], 'return_status' => $e->getCode(), 'return_msg' => $e->getMessage()]);
 //            return ['code' => $e->getCode(), 'msg' => $e->getMessage(), 'res' => Tools::arrayToXml(['return_code' => 'FAIL', 'return_msg' => $e->getMessage()])];
             return ['code' => $e->getCode(), 'msg' => $e->getMessage(), 'res' => $this->service->returnData(0, $e)];
         }
